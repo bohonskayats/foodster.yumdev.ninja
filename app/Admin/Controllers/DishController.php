@@ -29,6 +29,8 @@ class DishController extends AdminController
         $grid = new Grid(new Dish());
         $grid->column('id', __('Id'))->sortable();
         $grid->column('title', __('Title'))->sortable();
+        $grid->column('Category.title', __('Category'));
+
         $grid->column('base_price', __('Bace price'))->sortable();
         $grid->column('publish')->filter([  0 => 'off',  1 => 'on', ])->bool();
         $grid->column('order', __('Ordering'))->sortable();

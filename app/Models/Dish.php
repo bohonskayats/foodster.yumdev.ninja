@@ -12,8 +12,12 @@ class Dish extends Model
     use HasFactory;
     use DefaultDatetimeFormat;
     public $timestamps = false;
-        public function getList(){
+    
+    public function getList(){
         return $this->get();
+    }
+    public function Category(){
+        return $this->hasOne(Category::class, 'id', 'category_id');
     }
 
 

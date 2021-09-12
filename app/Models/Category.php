@@ -16,6 +16,9 @@ class Category extends Model
 
     use ModelTree, AdminBuilder;
 
+    public function getList(){
+        return $this->get();
+    }
 
 	 public function __construct(array $attributes = [])
 	    {
