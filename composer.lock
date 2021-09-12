@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e1b278ff22f0bcdc0be3b6bce134ea25",
+    "content-hash": "284654c764d2d518e44cc28e0faedbc3",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1296,21 +1296,21 @@
             "time": "2021-06-30T20:03:07+00:00"
         },
         {
-            "name": "laravel-admin-ext/wang-editor",
-            "version": "v1.2.1",
+            "name": "jxlwqq/wang-editor2",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/laravel-admin-extensions/wangEditor.git",
-                "reference": "d80ad518176fdd7b4d8a03ff4e779fb56ceb3d52"
+                "url": "https://github.com/laravel-admin-extensions/wangEditor2.git",
+                "reference": "46622fe683c076718e6bee1e5bb9b8ad842fd0cd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel-admin-extensions/wangEditor/zipball/d80ad518176fdd7b4d8a03ff4e779fb56ceb3d52",
-                "reference": "d80ad518176fdd7b4d8a03ff4e779fb56ceb3d52",
+                "url": "https://api.github.com/repos/laravel-admin-extensions/wangEditor2/zipball/46622fe683c076718e6bee1e5bb9b8ad842fd0cd",
+                "reference": "46622fe683c076718e6bee1e5bb9b8ad842fd0cd",
                 "shasum": ""
             },
             "require": {
-                "encore/laravel-admin": ">=1.6",
+                "encore/laravel-admin": "~1.6",
                 "php": ">=7.0.0"
             },
             "require-dev": {
@@ -1320,13 +1320,13 @@
             "extra": {
                 "laravel": {
                     "providers": [
-                        "Encore\\WangEditor\\WangEditorServiceProvider"
+                        "Jxlwqq\\WangEditor2\\WangEditor2ServiceProvider"
                     ]
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "Encore\\WangEditor\\": "src/"
+                    "Jxlwqq\\WangEditor2\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -1335,22 +1335,21 @@
             ],
             "authors": [
                 {
-                    "name": "song",
-                    "email": "zosong@126.com"
+                    "name": "jxlwqq",
+                    "email": "jxlwqq@gmail.com"
                 }
             ],
-            "description": "wangEditor extension for laravel-admin",
-            "homepage": "https://github.com/laravel-admin-extensions/wangEditor",
+            "description": "wang-editor2 for laravel-admin",
+            "homepage": "https://github.com/jxlwqq/wangEditor2",
             "keywords": [
-                "editor",
                 "extension",
                 "laravel-admin"
             ],
             "support": {
-                "issues": "https://github.com/laravel-admin-extensions/wangEditor/issues",
-                "source": "https://github.com/laravel-admin-extensions/wangEditor/tree/v1.2.1"
+                "issues": "https://github.com/jxlwqq/wangEditor2/issues",
+                "source": "https://github.com/jxlwqq/wangEditor2/tree/master"
             },
-            "time": "2020-09-14T06:23:17+00:00"
+            "time": "2018-12-04T04:15:44+00:00"
         },
         {
             "name": "laravel/framework",

@@ -21,6 +21,9 @@ class CreateDishesTable extends Migration
             $table->integer('category_id')->nullable();
             //$table->integer('base_price')->nullable();
             $table->decimal('base_price', $precision = 8, $scale = 2);
+            $table->integer('order');
+            $table->integer('publish');
+
         });
     }
 

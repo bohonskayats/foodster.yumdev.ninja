@@ -2,7 +2,9 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\Category;
 use App\Models\Dish;
+ 
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
@@ -25,15 +27,14 @@ class DishController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Dish());
-        $grid->column('id', __('Id'));
-        $grid->column('title', __('Title'));
-        $grid->column('baseprice', __('Bace price'));
+        $grid->column('id', __('Id'))->sortable();
+        $grid->column('title', __('Title'))->sortable();
+        $grid->column('base_price', __('Bace price'))->sortable();
+        $grid->column('publish')->filter([  0 => 'off',  1 => 'on', ])->bool();
+        $grid->column('order', __('Ordering'))->sortable();
+       // $grid->column('category_id')->filter([  0 => 'off',  1 => 'on', ])->bool();
 
-        $grid->column('description', __('Description'))->style('max-width:200px;word-break:break-all;')->display(function ($val){
-            return substr($val,0,30);
-        });
-
-
+       // $grid->column('Categories.title', __('Category'));
         return $grid;
     }
 
@@ -47,16 +48,14 @@ class DishController extends AdminController
     {
         $show = new Show(Dish::findOrFail($id));
         $show->field('title', __('title'));
-        //$show->field('category_id', __('Parameter_id'));
-       $show->field('pictures', __('Thumbnail'))->image();
+        $show->field('pictures', __('Thumbnail'))->image();
 	   	$show->field('description',__('Description'));
+        $show->field('publish', __('Publish'));
+        $show->field('order', __('Order'));        
+		$show->field('base_price', __('Price'));
+        $show->field('category_id', __('Category'));
 
-       // $show->column('Cagegory.title', __('Category'));
-       /* $show->column('description', __('Description'))->style('max-width:200px;word-break:break-all;')->display(function ($val){
-            return substr($val,0,30);
-      //  });*/
-     //  $show->field('base_price', __('Base price'));
-
+       // $show->field('category_id', __('Category'));
 
         return $show;
     }
@@ -69,27 +68,46 @@ class DishController extends AdminController
     protected function form()
     {
         $form = new Form(new Dish());
+ 	   	$form->select("category_id", __('Category'))->options((new Category())::selectOptions());
 
-       // $form->field('id', __('Id'));
         $form->text('title', __('Title'));
-       // $label="E";
         $form->image('picture', __('Thumbnail'))->uniqueName();
-       // $form->field('base_price', __('Base price'));
-       // $form->number('base_price', __('Order'))->default(0);
-$form->currency('base_price');
+ 	   	$form->currency('base_price');
+ 	   //	$model_1 = new Category();
 
-         //$form->field('base_price', __('Base price'));
- $form->editor('description');
-// options 中参数会覆盖 extensions.ueditor.config 中参数
-//$form->editor('description')->options(['initialFrameHeight' => 800]);
 
- //$form->editor('description', __('Article_content'));
-       // $form->field('category_id', __('Category_id'));
-       /* $form->field('picture', __('Thumbnail'))->image();
-        
-        $form->field('base_price', __('Base price'));
+ 	   /*	->options(function ($id) {
+	 	   	$category = Category::all();
+	 	   	$res=[];
+		    if ($category) {
+			    foreach ($category as $key=>$value) {
+				    var_dump($key);
+				    var_dump($value);exit;
+				    echo $key." ".$value.'//';
+					    ///$value = $value * 2;
+					    $res2[$key]=$value;
+					    $res[] = $res2;//[$key => $value];
+					}
+					var_dump($res);exit;
+		        return [$category->id => $category->title];
+		    }
+		    var_dump($res);exit;
+		});*/
+ 	   //	->options([1 => 'foo', 2 => 'bar', 'val' => 'Option name']);
 
-*/
+       // $form->select('category_id', __('Type_id'))->options((new Category())::selectOptions());
+        //$form->select('type_id', __('Type_id'))->options((new ArticleType())::selectOptions());
+
+ 		$form->editor('description');
+        $states = [
+	        'off' => ['value' => 0, 'text' => 'Not publishing', 'color' => 'danger'],
+	        'on'  => ['value' => 1, 'text' => 'Publish', 'color' => 'success'],
+		];
+ 
+        $form->switch('publish',__('Publish'))->states($states);
+        $form->number('order', __('Order'))->default(1);
+
+ 
 
         return $form;
     }

@@ -7,6 +7,12 @@ use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Encore\Admin\Layout\Content;
+use Encore\Admin\Tree;
+
+
+
+
 
 class CategoryController extends AdminController
 {
@@ -16,6 +22,15 @@ class CategoryController extends AdminController
      * @var string
      */
     protected $title = 'Category';
+//	use ModelForm;
+
+    /*public function index()
+    {
+        return Admin::content(function (Content $content) {
+            $content->header('Categories');
+            $content->body(Category::tree());
+        });
+    }*/
 
 
     /**
@@ -26,8 +41,13 @@ class CategoryController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Category());
-        $grid->column('id', __('Id'));
-        $grid->column('title', __('Title'));
+        
+        
+        $grid->column('id', __('Id'))->sortable();
+        $grid->column('title', __('Title'))->sortable();
+        $grid->column('publish')->filter([  0 => 'off',  1 => 'on', ])->bool();
+        $grid->column('order', __('Ordering'))->sortable();
+        //$grid->column('category_id')->filter([  0 => 'off',  1 => 'on', ])->bool();
 
         return $grid;
     }
@@ -44,8 +64,10 @@ class CategoryController extends AdminController
 
         $show->field('id', __('Id'));
         $show->field('title', __('title'));
-        $show->field('parameter_id', __('Parameter_id'));
         $show->field('icon', __('Thumbnail'))->image();
+
+        $show->field('order', __('Order'));
+        $show->field('publish', __('Publish'));
 
         return $show;
     }
@@ -58,10 +80,19 @@ class CategoryController extends AdminController
     protected function form()
     {
         $form = new Form(new Category());
-       // $form->select('type_id', __('Type_id'))->options((new ArticleType())::selectOptions());
         $form->text('title', __('Title'));
         $form->image('icon', __('Thumbnail'))->uniqueName();
+       // $form->select('parent_id', __('Parent Category'))->options((new Category())::selectOptions())->default(0);;
+       // $form->select('parent_id', __('Parent Category'))->options((new Category())::selectOptions());
+
+        $states = [
+	        'off' => ['value' => 0, 'text' => 'Not publishing', 'color' => 'danger'],
+	        'on'  => ['value' => 1, 'text' => 'Publish', 'color' => 'success'],
+		];
  
-         return $form;
+        $form->switch('publish',__('Publish'))->states($states);
+        $form->number('order', __('Order'))->default(1);
+
+        return $form;
     }
 }
