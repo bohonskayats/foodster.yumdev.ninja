@@ -2,22 +2,20 @@
 
 namespace App\Admin\Controllers;
 
-use App\Models\Category;
-use App\Models\Dish;
- 
+use App\Models\Parameter;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
 
-class DishController extends AdminController
+class ParameterController extends AdminController
 {
     /**
      * Title for current resource.
      *
      * @var string
      */
-    protected $title = 'Dish';
+    protected $title = 'Parameter';
 
     /**
      * Make a grid builder.
@@ -26,14 +24,17 @@ class DishController extends AdminController
      */
     protected function grid()
     {
-        $grid = new Grid(new Dish());
+        $grid = new Grid(new Parameter());
         $grid->column('id', __('Id'))->sortable();
         $grid->column('title', __('Title'))->sortable();
-        $grid->column('Category.title', __('Category'));
+        $grid->column('value', __('Value'))->sortable();
+        $grid->column('units', __('Units'))->sortable();
 
-        $grid->column('base_price', __('Bace price'))->sortable();
+        $grid->column('price', __('Price'))->sortable();
         $grid->column('publish')->filter([  0 => 'off',  1 => 'on', ])->bool();
         $grid->column('order', __('Ordering'))->sortable();
+
+
         return $grid;
     }
 
@@ -45,14 +46,17 @@ class DishController extends AdminController
      */
     protected function detail($id)
     {
-        $show = new Show(Dish::findOrFail($id));
+        $show = new Show(Parameter::findOrFail($id));
         $show->field('title', __('title'));
-        $show->field('pictures', __('Thumbnail'))->image();
-	   	$show->field('description',__('Description'));
+		$show->field('value', __('Value'));
+		$show->field('units', __('Units'));
+		$show->field('price', __('Price'));
+
         $show->field('publish', __('Publish'));
-        $show->field('order', __('Order'));        
-		$show->field('base_price', __('Price'));
-        $show->field('category_id', __('Category'));
+        $show->field('order', __('Order'));    
+            
+
+
 
         return $show;
     }
@@ -60,18 +64,19 @@ class DishController extends AdminController
     /**
      * Make a form builder.
      *
-     * @return Form 
+     * @return Form
      */
     protected function form()
     {
-        $form = new Form(new Dish());
- 	   	$form->select("category_id", __('Category'))->options((new Category())::selectOptions());
+        $form = new Form(new Parameter());
 
+ 
         $form->text('title', __('Title'));
-        $form->image('picture', __('Thumbnail'))->uniqueName();
- 	   	$form->currency('base_price');
+        $form->text('value', __('Value'));
+        $form->text('units', __('Units'));
 
- 		$form->editor('description');
+ 	   	$form->currency('price');
+
         $states = [
 	        'off' => ['value' => 0, 'text' => 'Not publishing', 'color' => 'danger'],
 	        'on'  => ['value' => 1, 'text' => 'Publish', 'color' => 'success'],
@@ -80,7 +85,6 @@ class DishController extends AdminController
         $form->switch('publish',__('Publish'))->states($states);
         $form->number('order', __('Order'))->default(1);
 
- 
 
         return $form;
     }

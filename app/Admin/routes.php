@@ -14,8 +14,15 @@ Route::group([
     $router->get('/', 'HomeController@index')->name('home');
 
     $router->resource('users', UsersController::class);
+    $router->resource('api/users', UsersController::class);
+
     $router->resource('categories', CategoryController::class);
     $router->resource('dishes', DishController::class);
+	$router->resource('parameters', ParameterController::class);
+	$router->resource('cities', CityController::class);
+	$router->resource('addresses', AddressController::class);
+	$router->resource('payment-methods', PaymentMethodController::class);
 
+	
 });
 
