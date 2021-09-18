@@ -20,5 +20,12 @@ class Dish extends Model
         return $this->hasOne(Category::class, 'id', 'category_id');
     }
 
+    public function parameters()
+    {
+       
+     //return $this->morphMany(Parameter::class,'dish_parameter');
+
+        return $this->belongsToMany(Parameter::class);
+    }
 
 }

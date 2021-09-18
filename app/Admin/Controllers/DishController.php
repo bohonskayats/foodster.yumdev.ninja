@@ -3,8 +3,11 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Category;
+use App\Models\Parameter;
+
 use App\Models\Dish;
- 
+use App\Admin\Selectable\Parameters;
+
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
@@ -27,6 +30,7 @@ class DishController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Dish());
+        
         $grid->column('id', __('Id'))->sortable();
         $grid->column('title', __('Title'))->sortable();
         $grid->column('Category.title', __('Category'));
@@ -34,6 +38,25 @@ class DishController extends AdminController
         $grid->column('base_price', __('Bace price'))->sortable();
         $grid->column('publish')->filter([  0 => 'off',  1 => 'on', ])->bool();
         $grid->column('order', __('Ordering'))->sortable();
+        
+        
+ 
+
+        $grid->parameters()->display(function ($parameters) {
+
+
+		    $parameters2 = array_map(
+		    function ($parameter) {
+			   // var_dump($parameter);
+		        
+		        return "<span class='label label-success'>{$parameter['title']}({$parameter['value']}{$parameter['units']})</span>";
+		    }, 
+		    $parameters);
+		
+		    return join('&nbsp;', $parameters2);
+		});
+
+        
         return $grid;
     }
 
@@ -79,8 +102,17 @@ class DishController extends AdminController
  
         $form->switch('publish',__('Publish'))->states($states);
         $form->number('order', __('Order'))->default(1);
+	//	$form->multipleSelect('parameters','Parameters')->options(Parameter::all()->pluck('title','id'));
+		$form->checkbox('parameters','Parameter')->options(Parameter::all()->mapWithKeys(function ($item, $key) {
+		    return [$item['id'] => $item['title'].' ('.$item['value'].' '.$item['units'].')'];
+		}) );
+		//$form->checkbox('parameters','Parameter')->options(Parameter::all()->pluck('title','id'));
+		//$form->belongsToMany('parameters', Parameters::class,'Parameter');
 
- 
+
+
+
+
 
         return $form;
     }
