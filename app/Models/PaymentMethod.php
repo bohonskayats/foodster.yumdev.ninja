@@ -1,6 +1,6 @@
 <?php
-
 namespace App\Models;
+
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Encore\Admin\Traits\DefaultDatetimeFormat;
@@ -15,8 +15,8 @@ class PaymentMethod extends Model
     public $timestamps = false;
 
     use ModelTree, AdminBuilder;
-
-    public function getList(){
+    
+     public function getList(){
         return $this->get();
     }
 

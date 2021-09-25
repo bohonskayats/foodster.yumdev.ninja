@@ -22,7 +22,7 @@ Route::group([
 	$router->resource('cities', CityController::class);
 	$router->resource('addresses', AddressController::class);
 	$router->resource('payment-methods', PaymentMethodController::class);
-
+	$router->resource('orders', OrderController::class);
 	
 });
 
