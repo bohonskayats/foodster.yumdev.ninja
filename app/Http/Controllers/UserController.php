@@ -5,13 +5,30 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Auth;
+//use JWTAuth;
+/*
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Api\ApiController;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\JWTAuth;
+use Illuminate\Http\Request;
+*/
 use JWTAuth;
+
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Mail;
 use App\Mail\PasswordReset;
 
 class UserController extends Controller
+//class UserController extends Authenticatable implements JWTSubject
 {
+	    public function __construct() {
+        $this->middleware('auth:api', ['except' => ['login', 'register','user_list']]);
+    }
+
+
+	
     public function register(Request $request){
         $plainPassword=$request->password;
         $password=bcrypt($request->password);
@@ -21,14 +38,30 @@ class UserController extends Controller
         $created=User::create($request->all());
         $request->request->add(['password' => $plainPassword]);
         // login now..
+       // var_dump($request);
+       // var_dump("!!!!!!!!!!!!!!!!!!!!");
         return $this->login($request);
     }
     public function login(Request $request)
     {
         
         $input = $request->only('email', 'password');
-        $jwt_token = null;
-        if (!$jwt_token = JWTAuth::attempt($input)) {
+               $credentials = $request->only('email', 'password');
+
+       if ($token = $this->guard()->attempt($credentials)) {
+            return $this->respondWithToken($token);
+        }
+
+        JWTAuth::attempt($input);
+       // var_dump($input);//exit;
+      // $credentials="9JfAr1Zmqar2LiLu1PMktWpolF0OjIQiENOfAymxNciqi6ynYFKafkWi1H2YvCi2";
+      //$token = auth()->tokenById(4);
+
+      //  $jwt_token = auth()->attempt($credentials);
+        // JWTAuth::attempt($input);
+       // $token = JWTAuth::attempt($input);//auth('api')->attempt($credentials);
+        //if ($jwt_token = JWTAuth::attempt($input)) {
+          if(true){
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid Email or Password',
@@ -65,7 +98,24 @@ class UserController extends Controller
             ], 500);
         }
     }
+ protected function respondWithToken($token)
+    {
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => $this->guard()->factory()->getTTL() * 60
+        ]);
+    }
 
+    /**
+     * Get the guard to be used during authentication.
+     *
+     * @return \Illuminate\Contracts\Auth\Guard
+     */
+    public function guard()
+    {
+        return Auth::guard();
+    }
     public function getCurrentUser(Request $request){
        if(!User::checkToken($request)){
            return response()->json([
@@ -109,6 +159,8 @@ public function update(Request $request){
 
 	public function user_list(Request $request)
 	{
+		///    $user=$this->getCurrentUser($request);
+
 	    $q = $request->get('q');
 	
 	    return User::where('name', 'like', "%$q%")->paginate(null, ['id', 'name as text']);

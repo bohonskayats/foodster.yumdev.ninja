@@ -37,7 +37,7 @@ class OrderController extends AdminController
         //$grid->column('title', __('Title'))->sortable();
       //  $grid->column('Category.title', __('Category'));
 
-        $grid->column('total_price', __('Total'))->sortable();
+        $grid->column('total_price', __('Total'))->sortable()->editable();
      ///   $grid->column('publish')->filter([  0 => 'off',  1 => 'on', ])->bool();
     //    $grid->column('order', __('Ordering'))->sortable();
 

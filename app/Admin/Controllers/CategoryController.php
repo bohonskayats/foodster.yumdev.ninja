@@ -44,7 +44,9 @@ class CategoryController extends AdminController
         
         
         $grid->column('id', __('Id'))->sortable();
-        $grid->column('title', __('Title'))->sortable();
+		$grid->column('icon')->image('/upload/', 100, 100);       
+		 $grid->column('title', __('Title'))->sortable();
+        
         $grid->column('publish')->filter([  0 => 'off',  1 => 'on', ])->bool();
         $grid->column('order', __('Ordering'))->sortable();
         //$grid->column('category_id')->filter([  0 => 'off',  1 => 'on', ])->bool();
@@ -64,7 +66,8 @@ class CategoryController extends AdminController
 
         $show->field('id', __('Id'));
         $show->field('title', __('title'));
-        $show->field('icon', __('Thumbnail'))->image();
+        $show->field('icon', __('Thumbnail'))->image('/upload/', 100, 100);
+		//$grid->field('icon')->image('/upload/', 100, 100);       
 
         $show->field('order', __('Order'));
         $show->field('publish', __('Publish'));
@@ -80,8 +83,9 @@ class CategoryController extends AdminController
     protected function form()
     {
         $form = new Form(new Category());
-        $form->text('title', __('Title'));
-        $form->image('icon', __('Thumbnail'))->uniqueName();
+        $form->text('title', __('Title'));        
+		$form->image('icon', trans('admin.avatar'))->move('images/')->uniqueName();
+
        // $form->select('parent_id', __('Parent Category'))->options((new Category())::selectOptions())->default(0);;
        // $form->select('parent_id', __('Parent Category'))->options((new Category())::selectOptions());
 

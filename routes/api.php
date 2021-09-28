@@ -34,6 +34,14 @@ Route::get('/user_address_list/', [App\Http\Controllers\AddressController::class
 Route::get('/user_address_list/{user_id}', [App\Http\Controllers\AddressController::class,'user_address_list']);
 Route::get('/user_address_list_by/', [App\Http\Controllers\AddressController::class,'user_address_list_by']);
 
+//user orders
+Route::get('/orders/', [App\Http\Controllers\OrderController::class,'orders']);
+Route::get('/orders/{order_id}', [App\Http\Controllers\OrderController::class,'order']);
+Route::get('/categories/', [App\Http\Controllers\CategoryController::class,'categories']);
+
+Route::get('/top_dishes/', [App\Http\Controllers\DishController::class,'top_dishes']);
+Route::get('/recommended_dishes/', [App\Http\Controllers\DishController::class,'recommended_dishes']);
+
 
 //get type_ie=3 articles where are welcome info
 //Route::get('/user_list/', 'App\Http\Controllers\UserController@user_list');
