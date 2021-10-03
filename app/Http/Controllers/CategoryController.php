@@ -61,6 +61,23 @@ public function categories(Request $request)
             ]);
 	   
 	}
+	/*
+	not need	
+		public function categories_for_select(Request $request)
+	{ 
+	  
+	  $res0=Category::all(['id', 'title']);
+	 // $res2=Address::where('user_id', $provinceId)->get(['id', DB::raw('title as text')]);
+			foreach($res0 as $key=>$value){
+				$res2[$value["id"]] =$value["title"] ;
+			}
+			//var_dump($res2);exit;
+	   return response()->json(
+               $res2,
+                //Category::all()->paginate(null, ['id', 'title'])
+            );
+	   
+	}*/
 }
 
 

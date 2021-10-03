@@ -38,6 +38,8 @@ Route::get('/user_address_list_by/', [App\Http\Controllers\AddressController::cl
 Route::get('/orders/', [App\Http\Controllers\OrderController::class,'orders']);
 Route::get('/orders/{order_id}', [App\Http\Controllers\OrderController::class,'order']);
 Route::get('/categories/', [App\Http\Controllers\CategoryController::class,'categories']);
+Route::get('/scategories/', [App\Http\Controllers\CategoryController::class,'categories_for_select']);
+
 
 Route::get('/top_dishes/', [App\Http\Controllers\DishController::class,'top_dishes']);
 Route::get('/recommended_dishes/', [App\Http\Controllers\DishController::class,'recommended_dishes']);
