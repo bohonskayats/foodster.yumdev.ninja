@@ -50,6 +50,40 @@ class DishController extends Controller
 	  return  Controller::getStandartResponce(401);
 	   
 	}*/
+	public function all_dishes(Request $request)
+	{ 
+	  
+	   return response()->json([
+                'success' => true,
+                'message' => '',
+                'results'=>Dish::all(['id', 'title']),
+                //Category::all()->paginate(null, ['id', 'title'])
+            ]);
+	   
+	}
+	public function dishes_by_category(Request $request)
+	{ 
+	  	        $categoryId = $request->get('q');
+			$res2=Dish::where('category_id', $categoryId)->get(['id', DB::raw('title as text')]);
+			//foreach($res2 as $r2){
+	//			$res[] =$r2 ;
+			//}
+
+	  return response()->json([
+                'success' => true,
+                'message' => '',
+                'results'=>$res2,
+                //Category::all()->paginate(null, ['id', 'title'])
+            ]);
+
+	  /* return response()->json([
+                'success' => true,
+                'message' => '',
+                'results'=>Dish::all(['id', 'title']),
+             ]);
+	   */
+	}
+
 public function top_dishes(Request $request)
 	{ 
 	  

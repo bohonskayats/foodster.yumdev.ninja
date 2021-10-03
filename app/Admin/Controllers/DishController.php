@@ -34,6 +34,7 @@ class DishController extends AdminController
         $grid->column('id', __('Id'))->sortable();
         $grid->column('title', __('Title'))->sortable();
         $grid->column('Category.title', __('Category'));
+		$grid->column('picture')->image('/upload/', 100, 100);       
 
         $grid->column('base_price', __('Bace price'))->sortable();
         $grid->column('publish')->filter([  0 => 'off',  1 => 'on', ])->bool();
@@ -70,7 +71,9 @@ class DishController extends AdminController
     {
         $show = new Show(Dish::findOrFail($id));
         $show->field('title', __('title'));
-        $show->field('pictures', __('Thumbnail'))->image();
+        $show->field('picture', __('Thumbnail'))->image('/upload/', 100, 100);
+
+       // $show->field('pictures', __('Thumbnail'))->image();
 	   	$show->field('description',__('Description'));
         $show->field('publish', __('Publish'));
         $show->field('order', __('Order'));        

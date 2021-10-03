@@ -41,6 +41,8 @@ Route::get('/categories/', [App\Http\Controllers\CategoryController::class,'cate
 
 Route::get('/top_dishes/', [App\Http\Controllers\DishController::class,'top_dishes']);
 Route::get('/recommended_dishes/', [App\Http\Controllers\DishController::class,'recommended_dishes']);
+Route::get('/dishes_by_category/', [App\Http\Controllers\DishController::class,'dishes_by_category']);
+
 
 
 //get type_ie=3 articles where are welcome info

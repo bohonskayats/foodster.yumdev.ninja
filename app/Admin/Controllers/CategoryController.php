@@ -84,7 +84,7 @@ class CategoryController extends AdminController
     {
         $form = new Form(new Category());
         $form->text('title', __('Title'));        
-		$form->image('icon', trans('admin.avatar'))->move('images/')->uniqueName();
+		$form->image('icon', trans('admin.icon'))->move('images/')->uniqueName();//admin.avatar
 
        // $form->select('parent_id', __('Parent Category'))->options((new Category())::selectOptions())->default(0);;
        // $form->select('parent_id', __('Parent Category'))->options((new Category())::selectOptions());
