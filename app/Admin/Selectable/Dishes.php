@@ -19,6 +19,7 @@ class Dishes extends Selectable
         $this->column('price');
 */
         $this->column('pictures')->image();
+		$this->column('parameter');
 
         $this->filter(function (Filter $filter) {
             $filter->like('title');
@@ -35,6 +36,7 @@ class Dishes extends Selectable
             }
 
             // Otherwise it is used in the `author_id` column, which directly displays the user’s `name` field
+            
             return optional($this->user)->name;
         };
     }

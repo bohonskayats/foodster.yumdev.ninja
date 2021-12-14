@@ -108,10 +108,18 @@ $filter->equal('category_id')->select(Category::all()->mapWithKeys(function ($it
  	   	$form->select("category_id", __('Category'))->options((new Category())::selectOptions());
 
         $form->text('title', __('Title'));
-        $form->image('picture', __('Thumbnail'))->uniqueName();
+      //  $form->image('picture', __('Thumbnail'))->uniqueName()->move('images')->uniqueName();//admin.avatar
+        
+        $form->image('picture', __('Thumbnail'))->thumbnail([
+    'small' => [null, 240],
+    'middle' => [null, 330],
+   /// 'full'=>[0,0]
+])->uniqueName()->move('images')->uniqueName();
+        
+        
  	   	$form->currency('base_price');
-
- 		$form->editor('description');
+ 	   	$form->textarea('description')->rows(3);
+ 		//$form->editor('description');
         $states = [
 	        'off' => ['value' => 0, 'text' => 'Not publishing', 'color' => 'danger'],
 	        'on'  => ['value' => 1, 'text' => 'Publish', 'color' => 'success'],

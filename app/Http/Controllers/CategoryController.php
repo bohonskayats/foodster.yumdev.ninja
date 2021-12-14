@@ -53,13 +53,17 @@ class CategoryController extends Controller
 public function categories(Request $request)
 	{ 
 	  
-	   return response()->json([
+	  /* return response()->json([
                 'success' => true,
                 'message' => '',
                 'results'=>Category::all(['id', 'title']),
                 //Category::all()->paginate(null, ['id', 'title'])
             ]);
-	   
+	   */
+	   return response()->json(
+                Category::all(['id', 'title']),
+                //Category::all()->paginate(null, ['id', 'title'])
+            );
 	}
 	/*
 	not need	

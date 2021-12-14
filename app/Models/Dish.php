@@ -11,9 +11,12 @@ class Dish extends Model
 {
     use HasFactory;
     use DefaultDatetimeFormat;
+
     public $timestamps = false;
     
     public function getList(){
+	        $dish->thumbnail('small','picture');
+
         return $this->get();
     }
     public function Category(){

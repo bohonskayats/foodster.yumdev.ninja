@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use \Encore\Admin\Traits\Resizable;
 
 use Illuminate\Http\Request;
 use App\Models\Dish;
@@ -10,8 +11,10 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 use Mail;
 use App\Mail\PasswordReset;
 use DB;
+use File;
 class DishController extends Controller
 {
+	
    
 	/*public function user_address_list(Request $request)
 	{
@@ -52,21 +55,30 @@ class DishController extends Controller
 	}*/
 	public function all_dishes(Request $request)
 	{ 
-	  
-	   return response()->json([
-                'success' => true,
-                'message' => '',
-                'results'=>Dish::all(['id', 'title']),
-                //Category::all()->paginate(null, ['id', 'title'])
-            ]);
-	   
+	  	$res2=Dish::paginate(5,['id', 'title','description','picture','base_price']);
+		$res_0=[];
+		foreach($res2 as $r2){
+					  $elem=$r2;     
+					  $elem["description"]=strip_tags($r2["description"]);
+		 			  $file_name=File::name($elem["picture"]);
+					  $file_extention=File::extension($elem["picture"]);
+					  $file_path=File::dirname($elem["picture"]);
+					  $elem["thumbnail_small"]=$file_path.'/'.$file_name."-small.".$file_extention;
+					  $elem["thumbnail_middle"]=$file_path.'/'.$file_name."-middle.".$file_extention;
+			 		  $elem["description"] = str_replace('&nbsp', " ", $elem["description"]);  
+ 		 	  		  $res_0[] =$elem ;
+				}  
+  
+  
+  
+	return response()->json($res_0);	   
 	}
-	public function dishes_by_category(Request $request)
+	public function dishes_by_category_help(Request $request)
 	{ 
-	  	        $categoryId = $request->get('q');
+	  	    $categoryId = $request->get('q');
 			$res2=Dish::where('category_id', $categoryId)->get(['id', DB::raw('title as text')]);
 			//foreach($res2 as $r2){
-	//			$res[] =$r2 ;
+			//$res[] =$r2 ;
 			//}
 
 	  return response()->json([
@@ -76,24 +88,95 @@ class DishController extends Controller
                 //Category::all()->paginate(null, ['id', 'title'])
             ]);
 
-	  /* return response()->json([
+	/* return response()->json([
                 'success' => true,
                 'message' => '',
                 'results'=>Dish::all(['id', 'title']),
              ]);
-	   */
+	*/
 	}
-
-public function top_dishes(Request $request)
+	public function dishes_by_category(Request $request)
 	{ 
-	  
-	   return response()->json([
+	  	/*$categoryId = $request->get('q');
+		$res2=Dish::where('category_id', $categoryId)->get(['id', DB::raw('title as text')]);
+ 
+		return response()->json([
                 'success' => true,
                 'message' => '',
-                'results'=>Dish::all(['id', 'title']),
-                //Category::all()->paginate(null, ['id', 'title'])
-            ]);
-	   
+                'results'=>$res2,
+             ]);*/
+	  	$categoryId = $request->get('q');
+	  	$res_0=[];
+		$res2=Dish::where('category_id', $categoryId)->paginate(5,['id', 'title','description','picture','base_price']);
+	 	foreach($res2 as $r2){
+			  $elem=$r2;     
+			 // 			  $elem["description2"]=$r2["description"];
+
+			  $elem["description"]=strip_tags($r2["description"]);
+			  //$elem["description"]=(double )$elem["description"]
+			  $file_name=File::name($elem["picture"]);
+			  $file_extention=File::extension($elem["picture"]);
+			  $file_path=File::dirname($elem["picture"]);
+			  $elem["thumbnail_small"]=$file_path.'/'.$file_name."-small.".$file_extention;
+			  $elem["thumbnail_middle"]=$file_path.'/'.$file_name."-middle.".$file_extention;
+	 		  $elem["description"] = str_replace('&nbsp', " ", $elem["description"]);  
+	  		  $res_0[] =$elem ;
+		}  
+  
+  
+      //paginate(5,['id', 'title','description','picture','base_price'])->
+	 // $res2=Dish::where('category_id', $categoryId)
+	  //->get(['id', DB::raw('title as text')])->cursorPaginate(15)->get(['id', DB::raw('title as text')]);
+    //  var_dump($res2);
+     // exit;
+     /* $res =Dish::paginate(5,['id', 'title','description','picture','base_price']);
+ 	 
+ 	  foreach($res as $r2){
+		  $elem=$r2;     
+		  $elem["description"]=strip_tags($r2["description"]);
+		  $file_name=File::name($elem["picture"]);
+		  $file_extention=File::extension($elem["picture"]);
+		  $file_path=File::dirname($elem["picture"]);
+		  $elem["thumbnail_small"]=$file_path.'/'.$file_name."-small.".$file_extention;
+		  $elem["thumbnail_middle"]=$file_path.'/'.$file_name."-middle.".$file_extention;
+ 		  $elem["description"] = str_replace('&nbsp', " ", $elem["description"]);  
+  		  $res_0[] =$elem ;
+	}*/
+	return response()->json($res_0);
+     
+
+ 	}
+
+
+
+	public function top_dishes(Request $request)
+		{ 
+		  $page = $request->get('q');
+	
+		   return response()->json([
+	                'success' => true,
+	                'message' => '',
+	                'results'=>Dish::all(['id', 'title']),
+	                //Category::all()->paginate(null, ['id', 'title'])
+	            ]);
+		   
+	}
+	public function top_dishes_list(Request $request)
+	{ 
+	  $res=Dish::paginate(5,['id', 'title','description','picture']);
+ 	  foreach($res as $r2){
+		  $elem=$r2;     
+		  $elem["description"]=strip_tags($r2["description"]);
+		  $file_name=File::name($elem["picture"]);
+		  $file_extention=File::extension($elem["picture"]);
+		  $file_path=File::dirname($elem["picture"]);
+		  $elem["thumbnail_small"]=$file_path.'/'.$file_name."-small.".$file_extention;
+		  $elem["thumbnail_middle"]=$file_path.'/'.$file_name."-middle.".$file_extention;
+ 		  $elem["description"] = str_replace('&nbsp', " ", $elem["description"]);  
+  		  $res_0[] =$elem ;
+	}
+	return response()->json($res_0);
+ 	   
 	}
 	public function recommended_dishes(Request $request)
 	{ 
@@ -103,9 +186,39 @@ public function top_dishes(Request $request)
                 'message' => '',
                 'results'=>Dish::all(['id', 'title']),
                 //Category::all()->paginate(null, ['id', 'title'])
-            ]);
+      ]);
 	   
 	}
+	
+	
+	//---------------------
+	/*
+		function show($head, $id)
+{
+     $var = $head.'-'.$id;
+     // do whatever you want with $var here
+}
+	*/
+	public function dish($dish_id)
+	{ $res_0=[];
+	 
+	   		$res=Dish::where('id', $dish_id)->get(['id', 'title','description','picture','base_price']);
+	   		//->paginate(1,['id', 'title','description','picture','base_price']);
+		 foreach($res as $r2){
+				  $elem=$r2;   
+				  //var_dump($elem);exit;  
+				  $elem["description"]=strip_tags($r2["description"]);
+				  $file_name=File::name($elem["picture"]);
+				  $file_extention=File::extension($elem["picture"]);
+				  $file_path=File::dirname($elem["picture"]);
+				  $elem["thumbnail_small"]=$file_path.'/'.$file_name."-small.".$file_extention;
+				  $elem["thumbnail_middle"]=$file_path.'/'.$file_name."-middle.".$file_extention;
+		 		  $elem["description"] = str_replace('&nbsp', " ", $elem["description"]);  
+		  		  $res_0[] =$elem ;
+			}
+			return response()->json($res_0);
+	}
+	
 
 }
 

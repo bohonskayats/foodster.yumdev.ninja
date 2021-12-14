@@ -41,9 +41,11 @@ Route::get('/categories/', [App\Http\Controllers\CategoryController::class,'cate
 Route::get('/scategories/', [App\Http\Controllers\CategoryController::class,'categories_for_select']);
 
 
-Route::get('/top_dishes/', [App\Http\Controllers\DishController::class,'top_dishes']);
+Route::get('/top_dishes/', [App\Http\Controllers\DishController::class,'top_dishes_list']);
 Route::get('/recommended_dishes/', [App\Http\Controllers\DishController::class,'recommended_dishes']);
 Route::get('/dishes_by_category/', [App\Http\Controllers\DishController::class,'dishes_by_category']);
+Route::get('/dishes/', [App\Http\Controllers\DishController::class,'all_dishes']);
+Route::get('/dishes/{dish_id}', [App\Http\Controllers\DishController::class,'dish']);
 
 
 
