@@ -1,0 +1,45 @@
+.param_name{}
+.param_price{ color:#FD7A5C}
+.param_weight{color:#999999}
+
+
+.input-group-param .form-control
+{}
+.form-control.increment{padding: 0px !important;height: 23px !important}
+
+.input-group-param button
+{
+	 
+	/*height:20px;*/
+	padding:1px 5px ;
+}
+.form-group-param {margin-bottom: 5px !important}
+.input-group-param input.increment{width: 50px; text-align: center; }
+
+.form-group-param .control-label{padding-top:0px !important }
+.form-group-param input[type="text" i] {padding: 0px 0px !important;}
+
+.loader {
+  border: 4px solid #f3f3f3; /* Light grey */
+  border-top: 4px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.container_modal_order_dish{
+
+	height: 200px;
+}
+.loader_outer{margin-top:60px}
+
+.container_order_dish_list div.box-order-dish-items{min-height: 100px;}
+
+img.img-thumbnail-list-parameter{
+	width: 50px; height: 50px; object-fit: cover;
+}

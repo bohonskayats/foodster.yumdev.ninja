@@ -23,6 +23,8 @@ Route::group([
 	$router->resource('addresses', AddressController::class);
 	$router->resource('payment-methods', PaymentMethodController::class);
 	$router->resource('orders', OrderController::class);
+	// $router->resource('dish-orders', DishOrderController::class);
+
 	
 });
 

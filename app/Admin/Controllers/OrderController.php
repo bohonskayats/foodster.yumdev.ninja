@@ -15,7 +15,7 @@ use Encore\Admin\Grid;
 use Encore\Admin\Show;
 Use Encore\Admin\Admin;
 use DB;
-
+use File;
 class OrderController extends AdminController
 {
     /**
@@ -84,8 +84,8 @@ class OrderController extends AdminController
 
 
         $show->field('items_count', __('items_count'));  
-        
-              
+
+  
         $show->field('day_deliver', __('day_deliver'));        
         $show->field('time_deliver', __('time_deliver'));        
         $show->field('payment_complete', __('payment_complete'));        
@@ -109,9 +109,7 @@ class OrderController extends AdminController
 	    Admin::js('/admin/javascript/order.js');
 	    Admin::script('console.log("hello world");');
         $form = new Form(new Order());
-     //   var_dump($id);
-     //   exit;
-		//$user_id="0";
+
 	 /*	$form->select('user_id',__('User'))->options(function ($id) {
 			    $user_id=$id;
 			    $user = User::find($id);
@@ -134,19 +132,16 @@ class OrderController extends AdminController
 		
  
 		$form->select('user_id')->options(function ($id) {
-			    			    $user = User::find($id);
-			
-			    if ($user) {
-			        return [$user->id => $user->name];
-			    }
+			    			    $user = User::find($id);			
+			if ($user) {
+			    return [$user->id => $user->name];
+			}
 		})->ajax('/api/user_list/')->load('address_id', '/api/user_address_list_by/');
 
 		$form->select('address_id')->options(function ($id) {
-			  $adr = Address::find($id);
+			$adr = Address::find($id);
  			$res[-1]="sdfsd-1fsd";
  			$res[-2]="sdf33333sd-1fsd";
-			//$res[] =$r ;
-
 			    if ($adr) {
 				    $res2=Address::where('user_id', $adr->user_id)->get(['id', DB::raw('title as text')]);
 					foreach($res2 as $key=>$r2){
@@ -160,20 +155,8 @@ class OrderController extends AdminController
 			   return $res;
 
 		});
-		
-		/*$form->divider();
-
-		        $form->text('address_title', __('Title'));
-        $form->text('address_street', __('Street'));
-        $form->text('address_apartment', __('Apartment'));
-        $form->text('address_intercom', __('Intercom'));
-        $form->text('address_floor', __('Floor'));
-
-		$form->divider();
-
-		*/
- 	   //	$form->select("user_id", __('user_id'))->options((new User())::selectOptions());
- 	  // 	$form->select("address_id", __('address_id'))->options((new Address())::selectOptions());
+ 	  //$form->select("user_id", __('user_id'))->options((new User())::selectOptions());
+ 	  //$form->select("address_id", __('address_id'))->options((new Address())::selectOptions());
  	 	$form->select("payment_id", __('payment type'))->options((new PaymentMethod())::selectOptions());
  	 	$form->select("status", __('status'))->options([1 => 'foo', 2 => 'bar', 'val' => 'Option name']);
 
@@ -185,7 +168,29 @@ class OrderController extends AdminController
  
      //   $form->switch('publish',__('Publish'))->states($states);
      //   $form->number('order', __('Order'))->default(1);
-        $form->belongsToMany('dishes', Dishes::class,'Dish');
+     
+       //$form->belongsToMany('dishes', Dishes::class,'Dish');
+        //$modal_view = file_get_contents('../../../../public/admin/html/modal.html');
+		//echo $modal_view;
+
+		 $path = public_path('admin/html');
+		 $content=File::get($path."/modal.html");
+		 $content2=File::get($path."/table_dishes.html");
+
+		 //echo $content;
+		 //$form->divider('9090');
+		 $form->html($content);
+		 $form->html($content2);
+		 $time=strtotime("now");
+		 Admin::js('/admin/javascript/order.js?'.$time);
+		 Admin::css('/admin/css/order.css?'.$time);
+		//Admin::css('/vendor/laravel-admin/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.min.css');
+
+		//http://foodster.yumdev.ninja/vendor/laravel-admin/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.min.css
+		 //$files = File::files($path);
+
+		 //dd($files);
+		//Admin::html('<template>...</template>');
 
 
   	  	$form->currency('total_price');
@@ -203,7 +208,64 @@ class OrderController extends AdminController
 		//$form->checkbox('parameters','Parameter')->options(Parameter::all()->pluck('title','id'));
 		//$form->belongsToMany('parameters', Parameters::class,'Parameter');
 
+		$form->saving(function (Form $form) {
+		
+		    // returns a simple response
+		  //  return response('xxxx');
+		
+		});
 
+		// callback before save
+		$form->saving(function (Form $form) {
+		    //...
+		    
+		    
+		});
+		// callback after save
+		$form->saved(function (Form $form) {
+		    //--------------
+		    // var_dump($form->input('test_value_input'));exit;
+		    
+		    $id = DB::table('dish_parameter_orders')->insertGetId(
+	          ['dish_order_id' => 0,//$request->input('name'),
+	           'count'=> 0,//$request->input('address')]
+	           'total_price'=>0,
+	           'title'=>'',
+	           'units'=>'',
+	           'price'=>0,
+	           'value'=>0]          
+			);
+			//---------------
+			/*
+			 $table->decimal('total_price', $precision = 8, $scale = 2);
+            $table->text('parameter_description');
+            $table->integer('count') ;
+            $table->integer('dish_id') ;
+            $table->integer('order_id');
+            //---
+            $table->string('title');
+            $table->text('description');
+            $table->decimal('base_price', $precision = 8, $scale = 2);
+
+			*/
+		    $id = DB::table('dish_orders')->insertGetId(
+	          [
+	           'total_price'=> 0,
+	           'parameter_description' => 'parameter_description', 	  
+	           'count'=> 0,
+	           'dish_id'=> 0,
+	           'order_id'=> 0,
+//---	         
+	           'title' => 'title', 
+	           'description' => 'description', 	           
+	           'base_price' => 0,//$request->input('name'),
+ 	                    
+	           
+			   ]	           
+			);
+
+		});
+		
         return $form;
     }
 }

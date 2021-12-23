@@ -56,15 +56,17 @@ class DishController extends AdminController
 		
 		    return join('&nbsp;', $parameters2);
 		});
-$grid->filter(function($filter){
-
-    // Remove the default id filter
-    $filter->disableIdFilter();
-   // $filter->like('category_id', 'Category.id');
-$filter->equal('category_id')->select(Category::all()->mapWithKeys(function ($item, $key) {
-		    return [$item['id'] => $item['title']];
-		}) 
-);
+		
+		
+		$grid->filter(function($filter){
+		
+		    // Remove the default id filter
+		    $filter->disableIdFilter();
+		   // $filter->like('category_id', 'Category.id');
+		$filter->equal('category_id')->select(Category::all()->mapWithKeys(function ($item, $key) {
+				    return [$item['id'] => $item['title']];
+				}) 
+		);
 //->select('/api/scategories');
 //$filter->equal('category_id',__('Category'))->select(['9' => '9','10' => '19']);
 
