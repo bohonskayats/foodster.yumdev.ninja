@@ -126,6 +126,8 @@ class DishController extends Controller {
 			$elem["thumbnail_small"] = $file_path.'/'.$file_name."-small.".$file_extention;
 			$elem["thumbnail_middle"] = $file_path.'/'.$file_name."-middle.".$file_extention;
 			$elem["description"] = str_replace('&nbsp', " ", $elem["description"]);
+			$elem["count"] =  1;
+
 			$res_0[] = $elem;
 		}
 

@@ -106,8 +106,8 @@ class OrderController extends AdminController
      */
     protected function form()
     {
-	    Admin::js('/admin/javascript/order.js');
-	    Admin::script('console.log("hello world");');
+	    //Admin::js('/admin/javascript/order.js');
+	    //Admin::script('console.log("hello world");');
         $form = new Form(new Order());
 
 	 /*	$form->select('user_id',__('User'))->options(function ($id) {
@@ -184,19 +184,17 @@ class OrderController extends AdminController
 		 $time=strtotime("now");
 		 Admin::js('/admin/javascript/order.js?'.$time);
 		 Admin::css('/admin/css/order.css?'.$time);
-		//Admin::css('/vendor/laravel-admin/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.min.css');
 
-		//http://foodster.yumdev.ninja/vendor/laravel-admin/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.min.css
 		 //$files = File::files($path);
 
 		 //dd($files);
 		//Admin::html('<template>...</template>');
 
 
-  	  	$form->currency('total_price');
+  	  	$form->currency('total_price')->disable();
   	   	$form->currency('discount_value');
   	   	$form->currency('delivery_price');
-  	   	$form->number('items_count')->default('3');
+  	   	$form->hidden('items_count')->default('3');
   	   	
         $form->textarea("client_comment",__('client_comment'))->rows(3);
         $form->textarea("manager_comment",__('manager_comment'))->rows(3);
