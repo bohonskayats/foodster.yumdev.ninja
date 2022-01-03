@@ -17,6 +17,8 @@ class CreateDishParameterOrdersTable extends Migration
             $table->id();
             //----
             $table->integer('dish_order_id');
+            $table->integer('parameter_id');
+
             $table->integer('count') ;
             $table->decimal('total_price', $precision = 8, $scale = 2);
 

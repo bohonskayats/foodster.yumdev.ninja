@@ -10,6 +10,11 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 use Mail;
 use App\Mail\PasswordReset;
 use DB;
+//namespace App\Admin\Controllers;
+//use Encore\Admin\Controllers\AdminController;
+
+Use Encore\Admin\Admin;
+
 class OrderController extends Controller
 {
    
@@ -52,7 +57,9 @@ public function orders(Request $request)
 	}
 public function order_by_id(Request $request)
 	{ 
+	//	var_dump(Admin::user()->id);
 	  if(auth()->user()){
+		  
 	   	$user_id=auth()->user()->id;
 	   	if($user_id){
 		   	$result=Controller::getStandartResponce(200);

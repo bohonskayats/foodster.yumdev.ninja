@@ -16,7 +16,9 @@ var order_dish_ws_parameters_array = [];
 function addOrderIfNeedDish(dishId) {
 	//is_isset_in_array_need_to_check
 	var is_checked;
-	if ($("input.checkbox-add-dish" + dishId).is(':checked')) {
+	if ($(".icheckbox-helper-modal" + dishId+".checked").length>0) {
+		
+		
 		is_checked = true;
 	}
 	else {
@@ -24,20 +26,14 @@ function addOrderIfNeedDish(dishId) {
 		//return -1;
 
 	}
-
 	var index_of_dish = -1;
 	if (is_checked) {
 		for (var i = 0; i < order_modal_dish_ws_parameters_array.length; i++) {
 
-			/*if (is_isset_in_array_need_to_check == false && order_modal_dish_ws_parameters_array[i].dishId == dishId) {
-				return true;
-			}
-			else {*/
-			if (/*is_isset_in_array_need_to_check == true &&*/ order_modal_dish_ws_parameters_array[i].dishId == dishId) {
+			if ( order_modal_dish_ws_parameters_array[i].dishId == dishId) {
 				index_of_dish = i;
 				break;
 			}
-			//}
 		}
 	}
 	var title = $(".tr_dish_" + dishId + " .column-title").text();
@@ -82,6 +78,8 @@ function addOrderIfNeedDish(dishId) {
  
 	var total_item_price = totalOrderDishByDataItem(elem.parameters, elem.base_price, elem.count);
 	$(".tr_dish_" + dishId + " .column-total span.total").text(total_item_price);
+		console.log(order_modal_dish_ws_parameters_array);
+
 	//return total_item_price;
 }
 //----------------------------------------------------------------------------------------------------------------------------------------
@@ -122,10 +120,11 @@ function orderIsCheckedDishes(dishId) {
 ////////////////////////////
 //. add parameter to dish
 ////////////////////////////
-function addOneParameterToDishOrder(parameter, is_modal, dishId) {
+function addOneParameterToDishOrder(parameter, is_modal, dishId,table_dish_index) {
+	var name_parameter=""
 	var hidden_field = "";
 	if (is_modal) {
-		name_parameter = "";
+		//name_parameter = "";
 		hidden_field = "<input type=\"hidden\" class=\"hidden_param_name\" value=\"" + parameter.title + "\"/>" +
 			"<input type=\"hidden\" class=\"hidden_param_units\" value=\"" + parameter.units + "\"/>" +
 			"<input type=\"hidden\" class=\"hidden_param_price\" value=\"" + parameter.price + "\"/>" +
@@ -133,14 +132,14 @@ function addOneParameterToDishOrder(parameter, is_modal, dishId) {
 			//"<input type=\"hidden\" class=\"hidden_param_count\" value=\""+parameter.count+"\"/>"+
 
 			"<input type=\"hidden\" class=\"hidden_param_id\" value=\"" + parameter.parameter_id + "\"/>";
-
+			//name_parameter="";
 	}
 	else {
 		var c = parameter.count;
 		if (parameter.count == 0) {
 			return "";
 		}
-		name_parameter = "name=\"parameters[" + dishId + "][" + parameter.parameter_id + "][]\"";
+		name_parameter = "name=\"parameters[" + dishId + "]["+table_dish_index+"][" + parameter.parameter_id + "]\"";
 		hidden_field = "";
 		//"<input type=\"hidden\" class=\"hidden_param_id\" value=\""+parameter.parameter_id+"\"/>";
 	}
@@ -151,7 +150,9 @@ function addOneParameterToDishOrder(parameter, is_modal, dishId) {
 
 		"<div class=\"col-sm-4\">" +
 		"<div class=\"input-group input-group-increment\">" +
-		"<div class=\"input-group input-group-param\"><input   min=\"0\" type=\"number\"   value=\"" + parameter.count + "\" " + name_parameter + " dishid=\"" + dishId + "\" class=\"form-control param_modal_count increment initialized\" placeholder=\"0\">" +
+		"<div class=\"input-group input-group-param\"><input   min=\"0\" type=\"number\"   value=\"" + parameter.count + "\" " +
+		 name_parameter + 
+		" dishid=\"" + dishId + "\" class=\"form-control param_modal_count increment initialized\" placeholder=\"0\">" +
 		"</div>" +
 		"</div>" +
 		"</div>" +
@@ -208,11 +209,12 @@ function getNewDishesListForOrder(page, startnom) {
 
 			}
 			parameters_string = "";
-			name_count_name = "name=\"dishcount[" + value.id + "][]\"";
+			var name_count_name = "";//"name=\"dishcount[" + value.id + "][]\"";
 
 			for (i = 0; i < value.parameters.length; i++) {
-				parameters_string += addOneParameterToDishOrder(value.parameters[i], true, value.id);
+				parameters_string += addOneParameterToDishOrder(value.parameters[i], true, value.id,-1);
 			}
+
 			string = "<tr data-key=\"" + value.id + "\" class=\"tr_dish_" + value.id + "\">" +
 
 				"<td class=\"column-\">" +//__modal_selector__
@@ -239,7 +241,7 @@ function getNewDishesListForOrder(page, startnom) {
 				"</span><span>$</span></div>" +
 
 				"<span class=\"dish_count col-sm-2\">x</span>" +
-				"<span class=\"dish_count col-sm-3\"><input   min=\"1\" type=\"number\"   value=\"" + value.count + "\" " + name_count_name +
+				"<span class=\"dish_count col-sm-3\"><input   min=\"1\" type=\"number\"   value=\"" + value.count + "\"" + name_count_name +
 				" dishid=\"" + value.id + "\" class=\"form-control dish_modal_count increment initialized\" placeholder=\"0\">" +
 				"</span></td>" +
 				"<td class=\"column-total\"><span class=\"total\">" +
@@ -276,6 +278,8 @@ function getNewDishesListForOrder(page, startnom) {
 
 }
 
+
+
 //----------------------------------------------------------------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------------------------------------------------------------
@@ -301,23 +305,23 @@ function calculateOrderTotalPrice(total_dishes_price) {
 //
 //----------------------------------------------------------------------------------------------------------------------------------------
 function getFromFilledDishesListForOrder() {
-
-
+ 
 	var index = 1;//startnom;
 	var total_dishes_price = 0;
 
 	$.each(order_modal_dish_ws_parameters_array, function (index0, value) {
-		//checked = "";
+ 		//checked = "";
 		//checked_area = "false";
 
 		//order_dish_ws_parameters_array.push(value);
-
+		//console.log(value);
 		var parameters_string = "";
+		index_for_table_dishes_result++;
+		var name_count_name = "name=\"dishcount[" + value.dishId + "]["+index_for_table_dishes_result+"]\"";
 
 		for (i = 0; i < value.parameters.length; i++) {
-			parameters_string += addOneParameterToDishOrder(value.parameters[i], false, value.dishId);
+			parameters_string += addOneParameterToDishOrder(value.parameters[i], false, value.dishId,index_for_table_dishes_result);
 		}
-		index_for_table_dishes_result++;
 		var total_item = totalOrderDishByDataItem(value.parameters, value.base_price, value.count);
 		//total_dishes_price += total_item;
 		var string = "<tr data-key=\"" + value.dishId + "\" class=\"order_dish_item order_dish_item_" + value.dishId + "  order_dish_index_" + index_for_table_dishes_result + "\" >" +
@@ -341,7 +345,7 @@ function getFromFilledDishesListForOrder() {
 			"</span><span>$</span></div>" +
 			"<span class=\"dish_count col-sm-2\">x</span>" +
 			"<span class=\"dish_count col-sm-4\"><input   min=\"0\" type=\"number\"   value=\"" + value.count + "\" " + name_count_name +
-			" dishid=\"" + value.id + "\" class=\"form-control param_modal_count increment initialized\" placeholder=\"0\">" +
+			" dishid=\"" + value.dishId + "\" class=\"form-control param_modal_count increment initialized\" placeholder=\"0\">" +
 			"</span></td>" +
 
 			"<td class=\"column-total\"><span class=\"total\">" +
@@ -405,7 +409,9 @@ function setOrderTotalPrice(total_price) {
 function orderHideShowListOfDishesIsEmpty() {
 
 	if ($("tr.order_dish_item").length == 0) {
-		$(".box-order-dish-items-total-price").show();
+		$(".box-order-dish-items-total-price").hide();
+				$(".box-order-dish-items-empty").show();
+
 	}
 	else {
 		$(".box-order-dish-items-empty").hide();
@@ -511,28 +517,22 @@ function orderAddOnModalCheckEventListerToCheckbox() {
 		input_elem = $(this).children("input.checkbox").first();
 		dishId = input_elem.val();
 		if ($(this).hasClass("checked")) {
+			
 			$(this).removeClass("checked");
-			$(this).attr("aria-checked", "true");
+			$(this).attr("aria-checked", "false");
 			removeOrderIfNeedDish(dishId);
 
 		}
 		else {
+		
 			$(this).addClass("checked");
-			$(this).attr("aria-checked", "false");
+			$(this).attr("aria-checked", "true");
 			addOrderIfNeedDish(dishId, false);
 
-		}
-		/*$(this ).children( "input.checkbox" ).each(function( index ) {
-			 if ($( this ).is(":checked") == true) {
-				 $( this ).attr('checked','');
-				   // $(this).val('yes');
-				} else {
 
-				   // $(this).val('no');
-				   $( this ).attr('checked','checked');
-				}
-			
-		});*/
+		}
+
+
 	});
 
 }
@@ -609,6 +609,8 @@ $(function () {
 			order_modal_dish_ws_parameters_array = [];
 		orderDishModalRefreshPage(1);
 	});
+	
+	
 	orderHideShowListOfDishesIsEmpty();
 
 

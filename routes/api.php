@@ -36,7 +36,7 @@ Route::get('/user_address_list_by/', [App\Http\Controllers\AddressController::cl
 
 //user orders
 Route::get('/orders/', [App\Http\Controllers\OrderController::class,'orders']);
-Route::get('/orders/{order_id}', [App\Http\Controllers\OrderController::class,'order']);
+Route::get('/orders/{order_id}', [App\Http\Controllers\OrderController::class,'order_by_id']);
 Route::get('/categories/', [App\Http\Controllers\CategoryController::class,'categories']);
 Route::get('/scategories/', [App\Http\Controllers\CategoryController::class,'categories_for_select']);
 
