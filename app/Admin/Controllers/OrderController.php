@@ -115,6 +115,49 @@ class OrderController extends AdminController {
 	 *
 	 * @return Form
 	 */
+	 
+	private function html_select($model_field_name,$id,$value,$placeholder=""){
+		$path = public_path('admin/html');
+		$content_select_full = File:: get($path."/new_select.html");
+		$content_select_empty = File:: get($path."/new_select_empty.html");
+
+		$content_select=$content_select_full;
+		
+		$content_select = preg_replace("/##model_field_name##/",
+							$model_field_name, 
+							$content_select);
+							
+		$content_select = preg_replace("/##_value_##/",
+							$value, 
+					$content_select);	
+											
+		$content_select = preg_replace("/##_id_##/",
+					$id, 
+					$content_select);
+		return  $content_select;			
+
+	}
+	
+	private function html_input($model_field_name,$value,$placeholder=""){
+		$path = public_path('admin/html');
+		$content_input = File:: get($path."/new_input.html");
+		
+		$content_input = preg_replace("/##model_field_name##/",
+							$model_field_name, 
+							$content_input);
+							
+		$content_input = preg_replace("/##_value_##/",
+							$value, 
+					$content_input);	
+																
+		$content_input = preg_replace("/##placeholder##/",
+					$placeholder, 
+					$content_input);
+					
+		return  $content_input;			
+
+	}
+	
 	protected function form($order_id) {
 
 		//$cur_client_id=-1;
@@ -129,6 +172,12 @@ class OrderController extends AdminController {
 		$content_table_dishes_p1 = File:: get($path."/table_dishes_p1.html");
 		$content_table_dishes_p2 = File:: get($path."/table_dishes_p2.html");
 		
+		
+		$content_table_address_input_street = File:: get($path."/address_input_street.html");
+		$content_table_address_input_apartment = File:: get($path."/address_input_apartment.html");
+		$content_table_address_input_intercom = File:: get($path."/address_input_intercom.html");
+		$content_table_address_input_floor = File:: get($path."/address_input_floor.html");
+
 		
 		$content_new_user = File:: get($path."/new_user.html");
 		$content_new_user_empty = File:: get($path."/new_user_empty.html");
@@ -184,6 +233,7 @@ class OrderController extends AdminController {
 			
 			//------------------
 			//get user info
+			//------------------
 			$form->hidden('user_id');
 			$user = DB::table('orders')
             ->join('users', 'orders.user_id', '=', 'users.id')
@@ -199,6 +249,8 @@ class OrderController extends AdminController {
 				$content_new_user = preg_replace("/##user_id##/", $user->id, $content_new_user);
 				$content_new_user = preg_replace("/##user_phone##/", $user->email, $content_new_user);
 				$form -> html($content_new_user,"Phone");
+				
+				
 			}
 			//$form -> html($content_new_user,"Client phone number");
 			//if($order_id>0){
@@ -221,33 +273,77 @@ class OrderController extends AdminController {
 	 			return $res;
 	
 			});*/
+			
 			//------------------
 			//get address info !
+			//------------------
 			$form->hidden('address_id');
 			
 			$address = DB::table('orders')
             ->join('addresses', 'orders.address_id', '=', 'addresses.id')
             ->where('orders.id', $order_id)
+            ->where('orders.user_id', 'addresses.user_id')
             ->select('addresses.*')
             ->first();
-//var_dump($address);
+			
+			$street_value="";
+			$apartment_value="";
+			$intercom_value="";
+			$floor_value="";
+			$city_id="";
+			$address_id="";
+			$description="";
+			
 			if($address==null || false){
-				$form -> html($content_new_address_empty,"Address");
+				//$form -> html($content_new_address_empty,"Address");
 			}
 			else{
+				$street_value=$address->street;
+				$apartment_value=$address->apartment;
+				$intercom_value=$address->intercom;
+				$floor_value=$address->floor;
 				
-				$content_new_address = preg_replace("/##address_id##/", $address->id, $content_new_address);
-				$description=$address->title;//$address->street." ".$address->apartment." , floor:" .$address->floor;
-				$content_new_address = preg_replace("/##address_description##/",$description, $content_new_address);
-				$form -> html($content_new_address,"Address");
+				$address_id=$address->id;
+				
+				////$content_new_address = preg_replace("/##address_id##/", $address->id, $content_new_address);
+				$description=$address->title;
+				//$address->street." ".$address->apartment." , floor:" .$address->floor;
+				//$content_new_address = preg_replace("/##address_description##/",$description, $content_new_address);
+				//$form -> html($content_new_address,"Address");
 			}
 
-			$form->select("city_id", __('City'))->options((new City())::selectOptions());
-	        $form->hidden('title');
-	        $form->text('street', __('Street'));
-	        $form->text('apartment', __('Apartment'));
-	        $form->text('intercom', __('Intercom'));
-	        $form->text('floor', __('Floor'));
+			
+			$form->html(OrderController::html_select('address_id',$address_id,'Test'),"Address");
+	
+			$form->html(OrderController::html_select('city_id',$city_id,'Test'),"City");
+			
+			$form->html(OrderController::html_input('street',$street_value),"Street");
+			$form->html(OrderController::html_input('apartment',$apartment_value),"Apartment");
+			$form->html(OrderController::html_input('intercom',$intercom_value),"Intercom");
+			$form->html(OrderController::html_input('floor',$floor_value),"Floor");
+
+			
+			/*$content_table_address_input_street = preg_replace("/##_value_##/",
+					$street_value, 
+					$content_table_address_input_street);*/
+					
+			/*$content_table_address_input_apartment = preg_replace("/##_value_##/",
+					$apartment_value, 
+					$content_table_address_input_apartment);
+			$content_table_address_input_intercom = preg_replace("/##_value_##/",
+					$intercom_value,
+					$content_table_address_input_intercom);
+			$content_table_address_input_floor = preg_replace("/##_value_##/",
+					$floor_value, 
+					$content_table_address_input_floor);*/
+											
+			//$form->select("city_id", __('City'))->options((new City())::selectOptions());
+	        //$form->hidden('title');
+	        /*$form->html($content_table_address_input_street,"Street");
+	        $form->html($content_table_address_input_apartment,"Apartment");
+	        $form->html($content_table_address_input_intercom,"Intercom");
+	        $form->html($content_table_address_input_floor,"Floor");*/
+
 
 			
 			
