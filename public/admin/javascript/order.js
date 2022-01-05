@@ -16,9 +16,9 @@ var order_dish_ws_parameters_array = [];
 function addOrderIfNeedDish(dishId) {
 	//is_isset_in_array_need_to_check
 	var is_checked;
-	if ($(".icheckbox-helper-modal" + dishId+".checked").length>0) {
-		
-		
+	if ($(".icheckbox-helper-modal" + dishId + ".checked").length > 0) {
+
+
 		is_checked = true;
 	}
 	else {
@@ -30,7 +30,7 @@ function addOrderIfNeedDish(dishId) {
 	if (is_checked) {
 		for (var i = 0; i < order_modal_dish_ws_parameters_array.length; i++) {
 
-			if ( order_modal_dish_ws_parameters_array[i].dishId == dishId) {
+			if (order_modal_dish_ws_parameters_array[i].dishId == dishId) {
 				index_of_dish = i;
 				break;
 			}
@@ -75,14 +75,40 @@ function addOrderIfNeedDish(dishId) {
 		}
 
 	}
- 
+
 	var total_item_price = totalOrderDishByDataItem(elem.parameters, elem.base_price, elem.count);
 	$(".tr_dish_" + dishId + " .column-total span.total").text(total_item_price);
-		console.log(order_modal_dish_ws_parameters_array);
+	console.log(order_modal_dish_ws_parameters_array);
 
 	//return total_item_price;
 }
 //----------------------------------------------------------------------------------------------------------------------------------------
+function addEventCheckIsNewUser() {
+	//is_new_user_check
+	$(".is_new_user_check").click(function () {
+
+		if ($(this).hasClass("checked")) {
+			$(this).attr("aria-checked", "false");
+			$(this).removeClass("checked");
+			$("#is_new_user_input").hide();
+			$("#is_new_user_check_hidden").val("false");
+
+		}
+		else {
+			$(this).attr("aria-checked", "true");
+			$("#is_new_user_input").show();
+			$("#is_new_user_check_hidden").val("true");
+			$(this).addClass("checked");
+		}
+
+	});
+
+}
+//----------------------------------------------------------------------------------------------------------------------------------------
+function addEventCheckIsNewAddress() {
+
+}
+
 //
 //----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -120,8 +146,8 @@ function orderIsCheckedDishes(dishId) {
 ////////////////////////////
 //. add parameter to dish
 ////////////////////////////
-function addOneParameterToDishOrder(parameter, is_modal, dishId,table_dish_index) {
-	var name_parameter=""
+function addOneParameterToDishOrder(parameter, is_modal, dishId, table_dish_index) {
+	var name_parameter = ""
 	var hidden_field = "";
 	if (is_modal) {
 		//name_parameter = "";
@@ -132,14 +158,14 @@ function addOneParameterToDishOrder(parameter, is_modal, dishId,table_dish_index
 			//"<input type=\"hidden\" class=\"hidden_param_count\" value=\""+parameter.count+"\"/>"+
 
 			"<input type=\"hidden\" class=\"hidden_param_id\" value=\"" + parameter.parameter_id + "\"/>";
-			//name_parameter="";
+		//name_parameter="";
 	}
 	else {
 		var c = parameter.count;
 		if (parameter.count == 0) {
 			return "";
 		}
-		name_parameter = "name=\"parameters[" + dishId + "]["+table_dish_index+"][" + parameter.parameter_id + "]\"";
+		name_parameter = "name=\"parameters[" + dishId + "][" + table_dish_index + "][" + parameter.parameter_id + "]\"";
 		hidden_field = "";
 		//"<input type=\"hidden\" class=\"hidden_param_id\" value=\""+parameter.parameter_id+"\"/>";
 	}
@@ -151,7 +177,7 @@ function addOneParameterToDishOrder(parameter, is_modal, dishId,table_dish_index
 		"<div class=\"col-sm-4\">" +
 		"<div class=\"input-group input-group-increment\">" +
 		"<div class=\"input-group input-group-param\"><input   min=\"0\" type=\"number\"   value=\"" + parameter.count + "\" " +
-		 name_parameter + 
+		name_parameter +
 		" dishid=\"" + dishId + "\" class=\"form-control param_modal_count increment initialized\" placeholder=\"0\">" +
 		"</div>" +
 		"</div>" +
@@ -212,7 +238,7 @@ function getNewDishesListForOrder(page, startnom) {
 			var name_count_name = "";//"name=\"dishcount[" + value.id + "][]\"";
 
 			for (i = 0; i < value.parameters.length; i++) {
-				parameters_string += addOneParameterToDishOrder(value.parameters[i], true, value.id,-1);
+				parameters_string += addOneParameterToDishOrder(value.parameters[i], true, value.id, -1);
 			}
 
 			string = "<tr data-key=\"" + value.id + "\" class=\"tr_dish_" + value.id + "\">" +
@@ -295,7 +321,7 @@ function calculateOrderTotalDishesPrice() {
 }
 
 function calculateOrderTotalPrice(total_dishes_price) {
- 	
+
 	var amount_delivery = parseFloat($("#delivery_price").val());
 	var amount_discount = parseFloat($("#discount_value").val());
 
@@ -305,22 +331,22 @@ function calculateOrderTotalPrice(total_dishes_price) {
 //
 //----------------------------------------------------------------------------------------------------------------------------------------
 function getFromFilledDishesListForOrder() {
- 
+
 	var index = 1;//startnom;
 	var total_dishes_price = 0;
 
 	$.each(order_modal_dish_ws_parameters_array, function (index0, value) {
- 		//checked = "";
+		//checked = "";
 		//checked_area = "false";
 
 		//order_dish_ws_parameters_array.push(value);
 		//console.log(value);
 		var parameters_string = "";
 		index_for_table_dishes_result++;
-		var name_count_name = "name=\"dishcount[" + value.dishId + "]["+index_for_table_dishes_result+"]\"";
+		var name_count_name = "name=\"dishcount[" + value.dishId + "][" + index_for_table_dishes_result + "]\"";
 
 		for (i = 0; i < value.parameters.length; i++) {
-			parameters_string += addOneParameterToDishOrder(value.parameters[i], false, value.dishId,index_for_table_dishes_result);
+			parameters_string += addOneParameterToDishOrder(value.parameters[i], false, value.dishId, index_for_table_dishes_result);
 		}
 		var total_item = totalOrderDishByDataItem(value.parameters, value.base_price, value.count);
 		//total_dishes_price += total_item;
@@ -390,9 +416,9 @@ function refreshOrdersTotals() {
 		total_dishes_price += total_item;
 	});
 
- 	setOrderDishesTotalPrice(total_dishes_price);
-	var total_price=calculateOrderTotalPrice(total_dishes_price);
- 	setOrderTotalPrice(total_price);
+	setOrderDishesTotalPrice(total_dishes_price);
+	var total_price = calculateOrderTotalPrice(total_dishes_price);
+	setOrderTotalPrice(total_price);
 	orderHideShowListOfDishesIsEmpty();
 }
 
@@ -410,7 +436,7 @@ function orderHideShowListOfDishesIsEmpty() {
 
 	if ($("tr.order_dish_item").length == 0) {
 		$(".box-order-dish-items-total-price").hide();
-				$(".box-order-dish-items-empty").show();
+		$(".box-order-dish-items-empty").show();
 
 	}
 	else {
@@ -517,14 +543,14 @@ function orderAddOnModalCheckEventListerToCheckbox() {
 		input_elem = $(this).children("input.checkbox").first();
 		dishId = input_elem.val();
 		if ($(this).hasClass("checked")) {
-			
+
 			$(this).removeClass("checked");
 			$(this).attr("aria-checked", "false");
 			removeOrderIfNeedDish(dishId);
 
 		}
 		else {
-		
+
 			$(this).addClass("checked");
 			$(this).attr("aria-checked", "true");
 			addOrderIfNeedDish(dishId, false);
@@ -598,21 +624,209 @@ function orderAddOnCheckEventListerToCheckbox() {
 
 */
 
+
+
+
+
+var curparam_user_phpne = "";
+var currrent_user_id = "";
+var $select2CityId;
+var $select2AddressId;
+//-------------------------------
+// clear address-datas
+//-------------------------------
+
+function clear_order_address_datas(flag_ws_addres_id,flag_ws_city){
+	$("input.street").val("");
+	$("input.title").val("");
+	$("input.apartment").val("");
+	$("input.intercom").val("");
+	$("input.floor").val("");
+	if(flag_ws_addres_id==true ){
+		$("input.address_id").val("");
+		$select2AddressId.val(null).trigger("change");
+	}
+	if(flag_ws_addres_id==true ||  flag_ws_city==true){
+		$("input.city_id").val("");
+		$select2CityId.val(null).trigger("change");
+	}
+	
+	
+	//city_id
+}
+function getRandomInt(max) {
+	return Math.floor(Math.random() * max);
+}
+
+
 $(function () {
+
 
 	$('#add_dishes_to_order').click(function () {
 		$('#add-dishes-to-order').modal('show');
 		order_dish_modal_current_page_nom = 1;
-		//order_modal_dish_ws_parameters_array.clear();
-		if (order_modal_dish_ws_parameters_array.length > 0)
-			//order_modal_dish_ws_parameters_array.clear();
+		if (order_modal_dish_ws_parameters_array.length > 0) {
 			order_modal_dish_ws_parameters_array = [];
+		}
 		orderDishModalRefreshPage(1);
 	});
-	
-	
+	addEventCheckIsNewUser();
 	orderHideShowListOfDishesIsEmpty();
+	currrent_user_id = $("input.user_id").val();
 
+	//-------------------------------
+	//user-id
+	//-------------------------------
+	$('.select2-user_id').select2({
+		ajax: {
+			url: '/api/user_list/',
+			type: "GET",
+			dataType: 'json',
+			data: function (params) {
+				curparam_user_phpne = "";
+				curparam_user_phpne = params.term;
+				var queryParameters = {
+					q: params.term
+				}
+				return queryParameters;
+			},
+			//selectOnClose: true,
+			processResults: function (data, page) {
+				var tmp_results = [];
+				//console.log(curparam)
+				if (curparam_user_phpne != null) {
+					Cint = getRandomInt(100000);
+
+
+					tmp_results.push({ "id": "d" + Cint, "text": curparam_user_phpne })
+				}
+				for (i = 0; i < data.data.length; i++) {
+					tmp_results.push({ "id": "" + data.data[i].id, "text": data.data[i].text });
+				}
+
+				// console.log(tmp_results);
+				return {
+					results: tmp_results
+					//data.data 
+				};
+			},
+			// cache: false,
+		},
+
+		placeholder: 'This is my placeholder',
+		allowClear: false
+	});
+	//   $select2CityId = $("select.city_id").select2();
+
+	//
+	$('.select2-user_id').on('select2:select', function (e) {
+		currrent_user_id = e.params.data["id"];
+		clear_order_address_datas(true);
+		//alert(currrent_user_id);
+		//var data = e.params.data;
+		//console.log(data);
+	});
+	//-------------------------------
+	//address-id
+	//-------------------------------
+	$select2AddressId=$('.select2-address_id').select2({
+		ajax: {
+			url: '/admin/api_user_address_list_by/',
+			type: "GET",
+			dataType: 'json',
+			data: function (params) {
+				//alert(currrent_user_id);
+				//curparam_user_phpne="";
+				//curparam_user_phpne=params.term;
+				var queryParameters = {
+					q: params.term,
+					u: currrent_user_id
+				}
+
+				return queryParameters;
+			},
+			//selectOnClose: true,
+			processResults: function (data, page) {
+				var tmp_results_adr = [];
+				//console.log(curparam)
+				// if(curparam_user_phpne!=null){
+				//   Cint=getRandomInt(100000)  ;
+
+
+				tmp_results_adr.push({ "id": "30", "text": "New address" })
+				//		}
+				for (i = 0; i < data.data.length; i++) {
+					tmp_results_adr.push({ "id": "" + data.data[i].id, "text": data.data[i].text });
+				}
+
+				// console.log(tmp_results);
+				return {
+					results: tmp_results_adr
+					//data.data 
+				};
+			},
+			 cache: false,
+		},
+
+		placeholder: 'This is my placeholder',
+		allowClear: true
+	});
+	//
+//	$select2AddressId = $("select.select2-address_id").select2();
+
+	$('.select2-address_id').on('select2:select', function (e) {
+		clear_order_address_datas(false,true);
+		//var data = e.params.data;
+		//console.log(data);
+		// Do something
+	});
+
+	$select2CityId = $("select.city_id").select2();
+
+
+
+
+	//-------------------------------
+	// end address-id
+	//-------------------------------
 
 
 })
+
+
+
+
+/*
+	
+	//--------
+	$('.js-example-basic-single').select2({
+	  ajax: {
+		url: '/api/user_list/',
+		type: "GET",
+		dataType: 'json',
+
+		data: function (params) {
+			var queryParameters = {
+			  q: params.term
+			}
+			return queryParameters;
+		},
+		processResults: function(data, page) {
+			return {
+			 //   var tmp_results=new Array();
+			   // tmp_results.push({id:-1,"Новый"})  
+				for (i=0;i<data.data.length;i++){
+				   // tmp_results.push(data.data[i]);
+				}
+				results: data.data };
+		},
+		cache: false,
+	  },  
+	    
+	  placeholder: 'This is my placeholder',
+	  allowClear: true
+	});
+
+	
+	
+*/

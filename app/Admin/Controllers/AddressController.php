@@ -29,7 +29,7 @@ class AddressController extends AdminController
     {
         $grid = new Grid(new Address());
         $grid->column('title', __('Title'))->sortable();
-        $grid->column('User.name', __('User'))->sortable();
+        $grid->column('User.email', __('User'))->sortable();
         $grid->column('City.title', __('City'))->sortable();
 
         $grid->column('street', __('Street'))->sortable();
@@ -83,9 +83,9 @@ class AddressController extends AdminController
 		    $user = User::find($id);
 		
 		    if ($user) {
-		        return [$user->id => $user->name];
+		        return [$user->id => $user->email];
 		    }
-		})->ajax('/api/user_list');
+		})->ajax('/admin/api_user_list');
 
         return $form;
     }

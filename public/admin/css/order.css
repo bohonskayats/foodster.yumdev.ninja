@@ -43,3 +43,8 @@
 img.img-thumbnail-list-parameter{
 	width: 50px; height: 50px; object-fit: cover;
 }
+
+#is_new_user_input{
+	
+	margin-top: 15px;
+}

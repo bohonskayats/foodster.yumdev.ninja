@@ -38,8 +38,6 @@ class UserController extends Controller
         $created=User::create($request->all());
         $request->request->add(['password' => $plainPassword]);
         // login now..
-       // var_dump($request);
-       // var_dump("!!!!!!!!!!!!!!!!!!!!");
         return $this->login($request);
     }
     public function login(Request $request)
@@ -53,20 +51,12 @@ class UserController extends Controller
         }
 
         JWTAuth::attempt($input);
-       // var_dump($input);//exit;
-      // $credentials="9JfAr1Zmqar2LiLu1PMktWpolF0OjIQiENOfAymxNciqi6ynYFKafkWi1H2YvCi2";
-      //$token = auth()->tokenById(4);
 
-      //  $jwt_token = auth()->attempt($credentials);
-        // JWTAuth::attempt($input);
-       // $token = JWTAuth::attempt($input);//auth('api')->attempt($credentials);
-        //if ($jwt_token = JWTAuth::attempt($input)) {
-          if(true){
-            return response()->json([
+        return response()->json([
                 'success' => false,
                 'message' => 'Invalid Email or Password',
             ], 401);
-        }
+
         // get the user 
         $user = Auth::user();
        
@@ -163,7 +153,7 @@ public function update(Request $request){
 
 	    $q = $request->get('q');
 	
-	    return User::where('name', 'like', "%$q%")->paginate(null, ['id', 'name as text']);
+	    return User::where('email', 'like', "%$q%")->paginate(null, ['id', 'email as text']);
 	}
 
 

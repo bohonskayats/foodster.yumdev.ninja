@@ -22,18 +22,14 @@ class AddressController extends Controller
 
 	public function user_address_list_by(Request $request)
 	{
-	        $provinceId = $request->get('q');
-$r["id"]=-1;
-$r["text"]="sdfsd-1fsd";
-$res[] =$r ;
-$r["id"]=-2;
-$r["text"]="sdfsdf-2sd";
-$res[] =$r ;
-$res2=Address::where('user_id', $provinceId)->get(['id', DB::raw('title as text')]);
-foreach($res2 as $r2){
-	$res[] =$r2 ;
-}
-return $res;
+	    $provinceId = $request->get('q');
+
+			$res= array();
+			$res2=Address::where('user_id', $provinceId)->get(['id', DB::raw('title as text')]);
+			foreach($res2 as $r2){
+				$res[] =$r2 ;
+			}
+		return $res;
   //  return Address::where('user_id', $provinceId)->get(['id', DB::raw('title as text')]);
 
 	 //   $q = $request->get('q');

@@ -3,6 +3,8 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Order;
+use App\Models\City;
+
 use App\Models\DishOrder;
 use App\Models\DishParameterOrder;
 
@@ -22,43 +24,6 @@ use File;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-// print_dish_order($item){
-	/*  $string='';
-	  $string+=" var title = \"".$item['title']."\";\n";
-	  $string+="var description = \"".$item['description']."\";\n";
-	  $string+="var picture_src = \"".$item['title']."\";\n";
-
-	  $string+="var base_price = \"".$item['base_price']."\";\n";
-
-	  $string+="var count = \"".$item['count']."\";\n";
-
-	  $string +="var parameters = [];\n";
-	  */
-	 /* $(".tr_dish_" + dishId + " .form-group-param").each(function (index) {
-
-		var selector_start = ".tr_dish_" + dishId + "  .form-group-param:eq( " + index + " )  ";
-		var selector_start2 = ".tr_dish_" + dishId + "  .form-group-param:eq( " + index + " )  .param_modal_count";
-
-		var parameter =
-		{
-			title: $(selector_start + " input.hidden_param_name  ").val(),
-			price: $(selector_start + " input.hidden_param_price").val(),
-			value: $(selector_start + " input.hidden_param_value").val(),
-			units: $(selector_start + " input.hidden_param_units").val(),
-			count: $(selector_start2).val(),
-			parameter_id: $(selector_start + " input.hidden_param_id").val(),
-		}
-		parameters.push(parameter)
-
-	});*/
-
-	//$string="var elem = { dishId: dishId, count: count, base_price: base_price, picture: picture_src, title: title, description: description, parameters: parameters };";
-	//$string+="order_modal_dish_ws_parameters_array.push(elem);\n";
-	  
-	// return $string;   
-	   
-	    
-   // }
 
 
 class OrderController extends AdminController {
@@ -81,15 +46,16 @@ class OrderController extends AdminController {
 	 */
 	protected function grid() {
 		$grid = new Grid(new Order());
+				$time = strtotime("now");
+		Admin:: js('/admin/javascript/order.js?'.$time);
+		Admin:: css('/admin/css/order.css?'.$time);
+
+		
+		
 		$grid -> column('id', __('Id')) -> sortable();
-		//$grid->column('title', __('Title'))->sortable();
-		//  $grid->column('Category.title', __('Category'));
-
+ 
 		$grid -> column('total_price', __('Total')) -> sortable() -> editable();
-		///   $grid->column('publish')->filter([  0 => 'off',  1 => 'on', ])->bool();
-		//    $grid->column('order', __('Ordering'))->sortable();
-
-		/*
+ 		/*
 			
 			 $grid->parameters()->display(function ($parameters) {
 		
@@ -139,8 +105,6 @@ class OrderController extends AdminController {
 		$show -> field('delivery_complete', __('delivery_complete'));
 		$show -> field('checkout_complete', __('checkout_complete'));
 
-		//   $show->field('order', __('Order'));        
-		//   $show->field('publish', __('publish'));        
 
 
 		return $show;
@@ -152,8 +116,31 @@ class OrderController extends AdminController {
 	 * @return Form
 	 */
 	protected function form($order_id) {
-		//var_dump($order_id);
+
+		//$cur_client_id=-1;
  		$form = new Form(new Order());
+ 		$user_id=$form;
+ 		
+ 		
+ 		//var_dump($user_id);
+ 		$path = public_path('admin/html');
+
+ 		$content = File:: get($path."/modal.html");
+		$content_table_dishes_p1 = File:: get($path."/table_dishes_p1.html");
+		$content_table_dishes_p2 = File:: get($path."/table_dishes_p2.html");
+		
+		
+		$content_new_user = File:: get($path."/new_user.html");
+		$content_new_user_empty = File:: get($path."/new_user_empty.html");
+
+		$content_new_address = File:: get($path."/new_address.html");
+		$content_new_address_empty = File:: get($path."/new_address_empty.html");
+
+		$time = strtotime("now");
+		Admin:: js('/admin/javascript/order.js?'.$time);
+		Admin:: css('/admin/css/order.css?'.$time);
+
+
  		/*	$form->select('user_id',__('User'))->options(function ($id) {
 				   $user_id=$id;
 				   $user = User::find($id);
@@ -175,26 +162,112 @@ class OrderController extends AdminController {
 		   */
 
 
-		$form -> select('user_id') -> options(function ($id) {
-			$user = User:: find($id);
-			if ($user) {
-				return [$user -> id => $user -> name];
-			}
-		}) -> ajax('/api/user_list/') -> load('address_id', '/api/user_address_list_by/');
 
-		$form -> select('address_id') -> options(function ($id) {
-			$adr = Address:: find($id);
-			$res[-1] = "sdfsd-1fsd";
-			$res[-2] = "sdf33333sd-1fsd";
-			if ($adr) {
-				$res2 = Address:: where('user_id', $adr -> user_id) -> get(['id', DB:: raw('title as text')]);
-				foreach($res2 as $key=> $r2){
- 					$res[$r2["id"]] = $r2["text"];
+
+
+		//$form->column(1/2, function ($form) {
+		//	$form->text("User_id","tmp");
+		    // Add a form item to this column
+		/*	$form -> select('user_id') -> options(function ($id) {
+				$user = User:: find($id);
+				if ($user) {
+					$cur_client_id=$user -> id;
+					return [$user -> id => $user -> email];
 				}
- 			}
- 			return $res;
+				else{
+					return [0 => ""];
+				}
+			}) -> ajax('/api/user_list/') -> load('address_id', '/api/user_address_list_by/');
+    */
+			//$form->checkbox('is_new_userdd','Is new')->options([1 => 'yes',]);
+			//$show->tag()->label();
+			
+			//------------------
+			//get user info
+			$form->hidden('user_id');
+			$user = DB::table('orders')
+            ->join('users', 'orders.user_id', '=', 'users.id')
+            ->where('orders.id', $order_id)
+            ->select('users.id', 'users.email')
+            ->first();
 
-		});
+			if($user==null){
+				$form -> html($content_new_user_empty,"Phone");
+			}
+			else{
+				
+				$content_new_user = preg_replace("/##user_id##/", $user->id, $content_new_user);
+				$content_new_user = preg_replace("/##user_phone##/", $user->email, $content_new_user);
+				$form -> html($content_new_user,"Phone");
+			}
+			//$form -> html($content_new_user,"Client phone number");
+			//if($order_id>0){
+			//	 $form -> html("<option value=\"".$user_id."\" selected=\"selected\">".$user_id."</option>");
+
+			//}
+		    ///$form -> html("</select");
+		  	/*$form -> select('address_id') -> options(function ($id) {
+	 			$res= array();
+				$adr = Address:: find($id);
+	 			//$res[-1] = "help 1 no in db";
+				//$res[-2] = "help 2 no in db";
+				if ($adr) {
+					//if($cur_client_id>0)
+					$res2 = Address:: where('user_id', $adr -> user_id) -> get(['id', DB:: raw('title as text')]);
+					foreach($res2 as $key=> $r2){
+	 					$res[$r2["id"]] = $r2["text"];
+					}
+	 			}
+	 			return $res;
+	
+			});*/
+			//------------------
+			//get address info !
+			$form->hidden('address_id');
+			
+			$address = DB::table('orders')
+            ->join('addresses', 'orders.address_id', '=', 'addresses.id')
+            ->where('orders.id', $order_id)
+            ->select('addresses.*')
+            ->first();
+//var_dump($address);
+			if($address==null || false){
+				$form -> html($content_new_address_empty,"Address");
+			}
+			else{
+				
+				$content_new_address = preg_replace("/##address_id##/", $address->id, $content_new_address);
+				$description=$address->title;//$address->street." ".$address->apartment." , floor:" .$address->floor;
+				$content_new_address = preg_replace("/##address_description##/",$description, $content_new_address);
+				$form -> html($content_new_address,"Address");
+			}
+
+			$form->select("city_id", __('City'))->options((new City())::selectOptions());
+	        $form->hidden('title');
+	        $form->text('street', __('Street'));
+	        $form->text('apartment', __('Apartment'));
+	        $form->text('intercom', __('Intercom'));
+	        $form->text('floor', __('Floor'));
+
+			
+			
+			
+			//$form -> html($content_new_address,"Address");
+
+			//			$form -> html($content_new_address);
+
+			//$form->checkbox('is_new_address','Is new')->options([1 => 'yes',]);
+
+		//});
+		
+		//$form->column(1/2, function ($form) {
+		
+		    // Add a form item to this column
+		    
+		  
+		//});
+
+
 		//$form->select("user_id", __('user_id'))->options((new User())::selectOptions());
 		//$form->select("address_id", __('address_id'))->options((new Address())::selectOptions());
 		$form -> select("payment_id", __('payment type')) -> options((new PaymentMethod()):: selectOptions());
@@ -212,10 +285,7 @@ class OrderController extends AdminController {
 		//$form->belongsToMany('dishes', Dishes::class,'Dish');
 		//$modal_view = file_get_contents('../../../../public/admin/html/modal.html');
 
-		$path = public_path('admin/html');
 
-		$content = File:: get($path."/modal.html");
-		$content_table_dishes_p1 = File:: get($path."/table_dishes_p1.html");
 		
 		//$order_dishes=DishOrder:: where('order_id', $order_id) ->get();
 
@@ -259,31 +329,14 @@ class OrderController extends AdminController {
 				'description' => $item-> description,
 				'base_price' => $item->base_price,
 			);
-			/*foreach($order_dish_parameters as $item_parameter){
-				$dish_parameter_order_ready[] = array(
-					
-					'dish_order_id'=> $item->dish_order_id,
-
-					'total_price'=> $item->total_price,
-					'count'=> $item->count,
-					'title' => $item->title,
-					'units' =>  $item->units,
-					'price'=> $item->price,
-					'value'=> $item->value,
-				);
-			}*/
 
 		}
 		
-		$content_table_dishes_p2 = File:: get($path."/table_dishes_p2.html");
 
 		$form -> html($content);
 		$form -> html($content_table_dishes_p1);
 		$form -> html($content_table_dishes_p2);
 
-		$time = strtotime("now");
-		Admin:: js('/admin/javascript/order.js?'.$time);
-		Admin:: css('/admin/css/order.css?'.$time);
 		
 		//----------------
 			$string =" var title = \"\";\n";
@@ -320,18 +373,7 @@ class OrderController extends AdminController {
             ->select('dish_parameter_orders.*')
             ->get();
 			foreach($order_dish_parameters as $item_parameter) {
-				/*$dish_parameter_order_ready[] = array(
-									
-									'dish_order_id'=> $item->dish_order_id,
-				
-									'total_price'=> $item->total_price,
-									'count'=> $item->count,
-									'title' => $item->title,
-									'units' =>  $item->units,
-									'price'=> $item->price,
-									'value'=> $item->value,
-								);*/
-	
+
 				$string.="  parameter = ";
 				$string.= "{ \n";
 				$string.=	" title: \"".$item_parameter->title."\",\n";
@@ -366,31 +408,8 @@ class OrderController extends AdminController {
 		$form -> textarea("manager_comment", __('manager_comment')) -> rows(3);
 		
 
-
-
-
-		$form -> currency('total_price') -> disable();
-		$form -> currency('discount_value');
-		$form -> currency('delivery_price');
-		$form -> hidden('items_count') ->default('3');
-  	   	
-        $form-> textarea("client_comment", __('client_comment')) -> rows(3);
-		$form -> textarea("manager_comment", __('manager_comment')) -> rows(3);
-		
-		//	$form->multipleSelect('parameters','Parameters')->options(Parameter::all()->pluck('title','id'));
-		/*$form->checkbox('parameters','Parameter')->options(Parameter::all()->mapWithKeys(function ($item, $key) {
-			return [$item['id'] => $item['title'].' ('.$item['value'].' '.$item['units'].')'];
-		}) );*/
-		//$form->checkbox('parameters','Parameter')->options(Parameter::all()->pluck('title','id'));
-		//$form->belongsToMany('parameters', Parameters::class,'Parameter');
-		//$order_id = $form -> id;
-		//var_dump($form -> model() );
-		//var_dump($order_id);
-		//var_dump($form->id);
-		//$form->display('id', 'ID');
-		//var_dump($form -> hidden('id')) ;
 		$form -> hidden('id');
-	
+	//var_dump($form);
 		
 		
  		// callback before save
@@ -454,8 +473,7 @@ class OrderController extends AdminController {
 
 						);
 					}
-//var_dump($tmp_parameters_info_for_save);exit;
-				}
+ 				}
 				$parameter_description = "";
 				if (count($parameter_text_for_dishes) > 0) {
 					$parameter_description = "add:".implode(",", $parameter_text_for_dishes);
@@ -483,11 +501,9 @@ class OrderController extends AdminController {
 					]
 				);
 				//save parameters
-				//var_dump($parameter_text_for_dishes);exit;
-				if (count($parameter_text_for_dishes) > 0) {
+ 				if (count($parameter_text_for_dishes) > 0) {
 					foreach($tmp_parameters_info_for_save as $parameter_item){
-						//var_dump($parameter_item);
-						// add item to dish_parameter_orders ...
+ 						// add item to dish_parameter_orders ...
  						$dish_order_parameter_id = DB:: table('dish_parameter_orders') -> insertGetId(
 							[
 								'dish_order_id'=> $dish_order_id,  
@@ -505,70 +521,15 @@ class OrderController extends AdminController {
 						);
 
 					}
-					//exit;
-
+ 
 
 
 				}
 			}
 		}
 	}
-	/*$id = DB:: table('dish_orders') -> insertGetId(
-		[
-			'total_price'=> 0,
-			'parameter_description' => 'parameter_description',
-			'count'=> 0,
-			'dish_id'=> 0,
-			'order_id'=> 0,
-			//---	         
-			'title' => 'title',
-			'description' => 'description',
-			'base_price' => 0,//$request->input('name'),
-
-
-		]
-	);*/
-	/*exit;
-	//var_dump($form->input('dishcount'));exit;
-	
-	$id = DB:: table('dish_parameter_orders') -> insertGetId(
-		['dish_order_id' => 0,//$request->input('name'),
-			'count'=> 0,//$request->input('address')]
-			'total_price'=> 0,
-			'title'=> '',
-			'units'=> '',
-			'price'=> 0,
-			'value'=> 0]
-	);*/
-	//---------------
-	/*
-	 $table->decimal('total_price', $precision = 8, $scale = 2);
-	$table->text('parameter_description');
-	$table->integer('count') ;
-	$table->integer('dish_id') ;
-	$table->integer('order_id');
-	//---
-	$table->string('title');
-	$table->text('description');
-	$table->decimal('base_price', $precision = 8, $scale = 2);
-
-	*/
-	/*	$id = DB:: table('dish_orders') -> insertGetId(
-			[
-				'total_price'=> 0,
-				'parameter_description' => 'parameter_description',
-				'count'=> 0,
-				'dish_id'=> 0,
-				'order_id'=> 0,
-				//---	         
-				'title' => 'title',
-				'description' => 'description',
-				'base_price' => 0,//$request->input('name'),
 	
 	
-			]
-		);
-	*/
 });
 
 return $form;
