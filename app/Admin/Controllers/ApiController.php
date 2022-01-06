@@ -31,6 +31,7 @@ class ApiController extends AdminController
 			
 			if($address_text==""){
 				return Address::where('user_id', $user_id)
+				//->select()
 				//->where('title', 'like', "%$address_text%")
 				//->get(['id', DB::raw('title as text')])
 				->paginate(null, ['id', 'title as text']);
@@ -39,6 +40,8 @@ class ApiController extends AdminController
 			else{
 				return Address::where('user_id', $user_id)
 				->where('title', 'like', "%$address_text%")
+				//->select('')
+				//CONCAT(Address, " ", PostalCode, " ", City)
 				//->get(['id', DB::raw('title as text')])
 				->paginate(null, ['id', 'title as text']);
 				

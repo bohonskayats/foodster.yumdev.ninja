@@ -62,8 +62,7 @@ class OrderController extends AdminController {
 		
 					$parameters2 = array_map(
 					function ($parameter) {
-					   // var_dump($parameter);
-					    
+ 					    
 						return "<span class='label label-success'>{$parameter['title']}({$parameter['value']}{$parameter['units']})</span>";
 					}, 
 					$parameters);
@@ -116,12 +115,38 @@ class OrderController extends AdminController {
 	 * @return Form
 	 */
 	 
-	private function html_select($model_field_name,$id,$value,$placeholder=""){
+	private function html_select($model_field_name,$id,$value,$need_hidden){
 		$path = public_path('admin/html');
 		$content_select_full = File:: get($path."/new_select.html");
 		$content_select_empty = File:: get($path."/new_select_empty.html");
+		$content_select_hidden="";
 
-		$content_select=$content_select_full;
+		if($need_hidden==true){
+			$content_select_hidden = File:: get($path."/new_select_hidden.html");
+			
+				
+			$content_select_hidden = preg_replace("/##model_field_name##/",
+								$model_field_name, 
+								$content_select_hidden);
+								
+			$content_select_hidden = preg_replace("/##_value_##/",
+								$value, 
+						$content_select_hidden);	
+												
+			$content_select_hidden = preg_replace("/##_id_##/",
+						$id, 
+						$content_select_hidden);
+			
+			
+		}
+		if($id>0 && strlen($value)>0){
+					$content_select=$content_select_full;
+
+		}
+		else{
+					$content_select=$content_select_empty;
+
+		}
 		
 		$content_select = preg_replace("/##model_field_name##/",
 							$model_field_name, 
@@ -134,7 +159,8 @@ class OrderController extends AdminController {
 		$content_select = preg_replace("/##_id_##/",
 					$id, 
 					$content_select);
-		return  $content_select;			
+
+		return  $content_select.$content_select_hidden;			
 
 	}
 	
@@ -159,31 +185,15 @@ class OrderController extends AdminController {
 	}
 	
 	protected function form($order_id) {
-
-		//$cur_client_id=-1;
+		
  		$form = new Form(new Order());
- 		$user_id=$form;
  		
- 		
- 		//var_dump($user_id);
  		$path = public_path('admin/html');
 
  		$content = File:: get($path."/modal.html");
 		$content_table_dishes_p1 = File:: get($path."/table_dishes_p1.html");
 		$content_table_dishes_p2 = File:: get($path."/table_dishes_p2.html");
 		
-		
-		$content_table_address_input_street = File:: get($path."/address_input_street.html");
-		$content_table_address_input_apartment = File:: get($path."/address_input_apartment.html");
-		$content_table_address_input_intercom = File:: get($path."/address_input_intercom.html");
-		$content_table_address_input_floor = File:: get($path."/address_input_floor.html");
-
-		
-		$content_new_user = File:: get($path."/new_user.html");
-		$content_new_user_empty = File:: get($path."/new_user_empty.html");
-
-		$content_new_address = File:: get($path."/new_address.html");
-		$content_new_address_empty = File:: get($path."/new_address_empty.html");
 
 		$time = strtotime("now");
 		Admin:: js('/admin/javascript/order.js?'.$time);
@@ -210,48 +220,27 @@ class OrderController extends AdminController {
 		   })->ajax('/api/user_address_list/');  
 		   */
 
-
-
-
-
-		//$form->column(1/2, function ($form) {
-		//	$form->text("User_id","tmp");
-		    // Add a form item to this column
-		/*	$form -> select('user_id') -> options(function ($id) {
-				$user = User:: find($id);
-				if ($user) {
-					$cur_client_id=$user -> id;
-					return [$user -> id => $user -> email];
-				}
-				else{
-					return [0 => ""];
-				}
-			}) -> ajax('/api/user_list/') -> load('address_id', '/api/user_address_list_by/');
-    */
-			//$form->checkbox('is_new_userdd','Is new')->options([1 => 'yes',]);
-			//$show->tag()->label();
-			
 			//------------------
 			//get user info
 			//------------------
-			$form->hidden('user_id');
-			$user = DB::table('orders')
+ 			$user = DB::table('orders')
             ->join('users', 'orders.user_id', '=', 'users.id')
             ->where('orders.id', $order_id)
             ->select('users.id', 'users.email')
             ->first();
+			$form->hidden('user_id');
+			$user_id=-1;
 
 			if($user==null){
-				$form -> html($content_new_user_empty,"Phone");
+				$form->html(OrderController::html_select('user_id',"","",false),"Phone");
+
 			}
-			else{
-				
-				$content_new_user = preg_replace("/##user_id##/", $user->id, $content_new_user);
-				$content_new_user = preg_replace("/##user_phone##/", $user->email, $content_new_user);
-				$form -> html($content_new_user,"Phone");
-				
-				
+			else{				
+				$form->html(OrderController::html_select('user_id',$user->id,$user->email,false),"Phone");
+				$user_id=$user->id;
 			}
+			
+
 			//$form -> html($content_new_user,"Client phone number");
 			//if($order_id>0){
 			//	 $form -> html("<option value=\"".$user_id."\" selected=\"selected\">".$user_id."</option>");
@@ -277,45 +266,48 @@ class OrderController extends AdminController {
 			//------------------
 			//get address info !
 			//------------------
-			$form->hidden('address_id');
-			
-			$address = DB::table('orders')
-            ->join('addresses', 'orders.address_id', '=', 'addresses.id')
-            ->where('orders.id', $order_id)
-            ->where('orders.user_id', 'addresses.user_id')
-            ->select('addresses.*')
-            ->first();
-			
+
+ 			if($user_id>0){
+				$address = DB::table('orders')
+	            ->join('addresses', 'orders.address_id', '=', 'addresses.id')
+	            ->join('cities', 'cities.id', '=', 'addresses.city_id')
+
+	           ->where('orders.id', $order_id)
+	            ->where('orders.user_id', $user_id)
+	            ->where('addresses.user_id', $user_id)
+	
+	            ->select('addresses.*','cities.title as city_name')
+	            ->first();
+
+			}
 			$street_value="";
 			$apartment_value="";
 			$intercom_value="";
 			$floor_value="";
 			$city_id="";
-			$address_id="";
+			$city_name="";
+			$address_id="-1";
 			$description="";
-			
+
 			if($address==null || false){
-				//$form -> html($content_new_address_empty,"Address");
-			}
+ 			}
 			else{
 				$street_value=$address->street;
 				$apartment_value=$address->apartment;
 				$intercom_value=$address->intercom;
 				$floor_value=$address->floor;
-				
-				$address_id=$address->id;
-				
-				////$content_new_address = preg_replace("/##address_id##/", $address->id, $content_new_address);
-				$description=$address->title;
-				//$address->street." ".$address->apartment." , floor:" .$address->floor;
-				//$content_new_address = preg_replace("/##address_description##/",$description, $content_new_address);
-				//$form -> html($content_new_address,"Address");
-			}
 
-			
-			$form->html(OrderController::html_select('address_id',$address_id,'Test'),"Address");
+
+				$city_name=$address->city_name;
+				$city_id=$address->city_id;
+				$address_id=$address->id;
+ 				$description=$address->title;
+ 			}
+ 
+			$form->html(OrderController::html_select('address_id',$address_id,$description,false),"Address");
+			$form->hidden("address_id");
 	
-			$form->html(OrderController::html_select('city_id',$city_id,'Test'),"City");
+			$form->html(OrderController::html_select('city_id',$city_id,$city_name,true),"City");
 			
 			$form->html(OrderController::html_input('street',$street_value),"Street");
 			$form->html(OrderController::html_input('apartment',$apartment_value),"Apartment");
@@ -323,45 +315,7 @@ class OrderController extends AdminController {
 			$form->html(OrderController::html_input('floor',$floor_value),"Floor");
 
 			
-			/*$content_table_address_input_street = preg_replace("/##_value_##/",
-					$street_value, 
-					$content_table_address_input_street);*/
-					
-			/*$content_table_address_input_apartment = preg_replace("/##_value_##/",
-					$apartment_value, 
-					$content_table_address_input_apartment);
-			$content_table_address_input_intercom = preg_replace("/##_value_##/",
-					$intercom_value,
-					$content_table_address_input_intercom);
-			$content_table_address_input_floor = preg_replace("/##_value_##/",
-					$floor_value, 
-					$content_table_address_input_floor);*/
-											
-			//$form->select("city_id", __('City'))->options((new City())::selectOptions());
-	        //$form->hidden('title');
-	        /*$form->html($content_table_address_input_street,"Street");
-	        $form->html($content_table_address_input_apartment,"Apartment");
-	        $form->html($content_table_address_input_intercom,"Intercom");
-	        $form->html($content_table_address_input_floor,"Floor");*/
-
-
 			
-			
-			
-			//$form -> html($content_new_address,"Address");
-
-			//			$form -> html($content_new_address);
-
-			//$form->checkbox('is_new_address','Is new')->options([1 => 'yes',]);
-
-		//});
-		
-		//$form->column(1/2, function ($form) {
-		
-		    // Add a form item to this column
-		    
-		  
-		//});
 
 
 		//$form->select("user_id", __('user_id'))->options((new User())::selectOptions());
@@ -505,22 +459,136 @@ class OrderController extends AdminController {
 		
 
 		$form -> hidden('id');
-	//var_dump($form);
+
+	//------------------------------------------------------------------------------------------------------
+	// callback before save
+	//------------------------------------------------------------------------------------------------------
+	
+	$form -> saving(function (Form $form) {
+		//-----------------
+		//create user
+		//-----------------
+		$ready_user_id=	$form ->input("user_id");
+		$int_id=intval($ready_user_id);
+		if("".$int_id=="".$ready_user_id){
+			//ok
+		}
+		else{
+			$int_id=-1;
+		}
+		$form ->input("user_id",$int_id);
+		if($int_id<1){
+			//new user
+			$user = User::create([
+			    'email' => $form ->input("user_id_value"),
+ 			]);	
+			$form ->input("user_id",$user->id);	
+			//$ready_user_id=	
+		}
+		//-----------------
+		// end of create user
+		//-----------------
 		
 		
- 		// callback before save
-		$form -> saving(function (Form $form) {
-			//...
+		//-----------------
+		//create city
+		//-----------------
+		$ready_city_id=	$form ->input("city_id");
+		$int_id=intval($ready_city_id);
+		if("".$int_id=="".$ready_city_id){
+			//ok
+		}
+		else{
+			$int_id=-1;
+		}
+		$form ->input("city_id",$ready_city_id);
+		if($int_id<1){
+			//new city
+
+			$isssetCity = DB::table('cities')->where("title",$form ->input("city_id_value"))->first();
+
+			if($isssetCity==null){
+				$city = City::create([
+				    'title' => $form ->input("city_id_value"),
+	 			]);		
+			}
+			else{
+				$city=$isssetCity;
+			}
+			
+			
+			$form ->input("city_id",$city->id);	
+		}
+		//-----------------
+		// end of create user
+		//-----------------
 		
 		
-		});
-	//----------------------------------
-	// callback after save
-	//----------------------------------
+		//-----------------
+		//create address
+		//-----------------
+		$ready_address_id=	$form ->input("address_id");
+		$int_id=intval($ready_address_id);
+		if("".$int_id=="".$ready_address_id){
+			//ok
+		}
+		else{
+			$int_id=-1;
+		}
+		$form ->input("address_id",$int_id);
+
+		if($int_id<1){
+			//new address
+			
+			$currentCity = DB::table('cities')
+			->where("id",$form ->input("city_id"))
+			->select("cities.*")
+			->first();
+			$intercom_for_save="";
+			$floor_for_save="";
+			
+			if ($form ->input("floor")!=""){
+				$floor_for_save=", floor:".$form ->input("floor");
+			}
+			if ($form ->input("intercom")!=""){
+				$intercom_for_save=", intercom:".$form ->input("intercom");
+			}
+			
+			
+			$title=$currentCity->title.", ".$form ->input("street")." ".$form ->input("apartment").
+			$intercom_for_save.$floor_for_save;
+
+			$address = Address::create([
+				'title' => "".$title,
+
+			    'street' => $form ->input("street"),
+			    'apartment' => $form ->input("apartment"),
+			    'intercom' => $form ->input("intercom"),
+			    'floor' => $form ->input("floor"),
+			    'city_id' => $form ->input("city_id"),
+			    'user_id' => $form ->input("user_id"),
+ 			]);	
+
+			$form ->input("address_id",$address->id);		
+		}
+		//-----------------
+		// end of create address
+		//-----------------		
+		
+		
+	});
+	//------------------------------------------------------------------------------------------------------
+	// callback after save 
+	//------------------------------------------------------------------------------------------------------
 	$form -> saved(function (Form $form) {
 
 	$order_id = $form -> model() -> id;
 
+
+
+	//--------------------------------
+	// save address !!!!
+	//--------------------------------
 	$query = DB:: table('dish_orders') -> select('id');
 	$dish_order_ids = $query -> where('order_id', $order_id) -> get();//addSelect('age')
 	//
@@ -569,7 +637,7 @@ class OrderController extends AdminController {
 
 						);
 					}
- 				}
+ 				}//if (isset($parameter_dish_order_inputs[$dish_id]) && ...
 				$parameter_description = "";
 				if (count($parameter_text_for_dishes) > 0) {
 					$parameter_description = "add:".implode(",", $parameter_text_for_dishes);
@@ -617,14 +685,13 @@ class OrderController extends AdminController {
 						);
 
 					}
- 
-
-
-				}
-			}
-		}
-	}
+				}//if (count($parameter_text_for_dishes) > 0)
+			}//foreach($value as $dish_number=> $count){
+		}//foreach($form -> input('dishcount') as $dish_id=> $value){
+	}//if (isset($d) && count($d) > 0) {
 	
+	
+	//resave  order ....
 	
 });
 

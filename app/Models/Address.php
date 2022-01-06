@@ -11,7 +11,18 @@ class Address extends Model
 {
     use HasFactory;
     use DefaultDatetimeFormat;
-     
+    
+    
+        protected $fillable = [
+        'street',
+        'apartment',
+        'intercom',
+         'floor',
+        'city_id',
+        'user_id',
+        'title'
+
+    ];
     public function getList(){
         return $this->get();
     }

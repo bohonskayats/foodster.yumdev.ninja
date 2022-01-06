@@ -304,7 +304,18 @@ function getNewDishesListForOrder(page, startnom) {
 
 }
 
+function getReadyId(parsed_id){
+ 	var ready_id=-2;
+	parsed = parseInt(parsed_id);
+	if (isNaN(parsed)) { 
+		ready_id =-1; 
+	}
+	else{
+		ready_id= parsed ;
 
+	}
+	return ready_id;
+ }
 
 //----------------------------------------------------------------------------------------------------------------------------------------
 //
@@ -629,8 +640,13 @@ function orderAddOnCheckEventListerToCheckbox() {
 
 
 var curparam_user_phpne = "";
-var currrent_user_id = "";
+var curparam_user_city = "";
+var current_user_id = "";
+var current_address_id="";
+var current_city_id = "";
+
 var $select2CityId;
+var $select2UserId;
 var $select2AddressId;
 //-------------------------------
 // clear address-datas
@@ -658,6 +674,64 @@ function getRandomInt(max) {
 	return Math.floor(Math.random() * max);
 }
 
+function setVisibleAddressDatasOrder(current_id,ws_animation=true){
+	var visibility=false;
+	if(current_id=="-1" || current_id==-1) {
+	 	visibility=true
+	 }
+	
+	
+	var selector_start="section.content form .fields-group >div >div.form-group:eq";
+
+	var animation_speed="slow";
+	
+	if(ws_animation==false){
+		if(visibility==true){
+			//$(".input_group_street input").prop( "disabled", false );
+			$(selector_start+"(2)").show();
+			$(selector_start+"(3)").show();
+			$(selector_start+"(4)").show();
+			$(selector_start+"(5)").show();
+			$(selector_start+"(6)").show();
+	
+		}
+		else{
+			//$(".input_group_street input").prop( "disabled", true );
+			$(selector_start+"(2)").hide( );
+			$(selector_start+"(3)").hide( );
+			$(selector_start+"(4)").hide( );
+			$(selector_start+"(5)").hide( );
+			$(selector_start+"(6)").hide( );
+			
+			
+		}
+
+	}
+	else{
+		if(visibility==true){
+			//$(".input_group_street input").prop( "disabled", false );
+			$(selector_start+"(2)").show( animation_speed, function() {});
+			$(selector_start+"(3)").show( animation_speed, function() {});
+			$(selector_start+"(4)").show( animation_speed, function() {});
+			$(selector_start+"(5)").show( animation_speed, function() {});
+			$(selector_start+"(6)").show( animation_speed, function() {});
+	
+		}
+		else{
+			//$(".input_group_street input").prop( "disabled", true );
+			$(selector_start+"(2)").hide( animation_speed, function() {});
+			$(selector_start+"(3)").hide( animation_speed, function() {});
+			$(selector_start+"(4)").hide( animation_speed, function() {});
+			$(selector_start+"(5)").hide( animation_speed, function() {});
+			$(selector_start+"(6)").hide( animation_speed, function() {});
+			
+			
+		}
+
+	}
+	
+	
+}
 
 $(function () {
 
@@ -672,12 +746,15 @@ $(function () {
 	});
 	addEventCheckIsNewUser();
 	orderHideShowListOfDishesIsEmpty();
-	currrent_user_id = $("input.user_id").val();
+	current_user_id = $("input.user_id").val();
+	current_address_id = $("input.address_id").val();
+	current_city_id = $("input.city_id").val();
 
+	setVisibleAddressDatasOrder(current_address_id,false);
 	//-------------------------------
 	//user-id
 	//-------------------------------
-	$('.select2-user_id').select2({
+	$select2UserId=$('.select2-user_id').select2({
 		ajax: {
 			url: '/api/user_list/',
 			type: "GET",
@@ -690,21 +767,63 @@ $(function () {
 				}
 				return queryParameters;
 			},
-			//selectOnClose: true,
-			processResults: function (data, page) {
+ 			processResults: function (data, page) {
 				var tmp_results = [];
-				//console.log(curparam)
-				if (curparam_user_phpne != null) {
+ 				if (curparam_user_phpne != null) {
 					Cint = getRandomInt(100000);
-
-
 					tmp_results.push({ "id": "d" + Cint, "text": curparam_user_phpne })
 				}
 				for (i = 0; i < data.data.length; i++) {
 					tmp_results.push({ "id": "" + data.data[i].id, "text": data.data[i].text });
 				}
+				return {
+					results: tmp_results
+					//data.data 
+				};
+			},
+			// cache: false,
+		},
 
-				// console.log(tmp_results);
+		placeholder: 'This is my placeholder',
+		allowClear: false
+	});
+ 
+	//
+	$select2UserId.on('select2:select', function (e) {
+		current_user_id = e.params.data["id"];
+ 		var ready_id=getReadyId(current_user_id);
+ 		$("input.user_id").val(ready_id);
+ 		$("input.user_id_value").val(e.params.data["text"]);
+
+		clear_order_address_datas(true);
+
+	});
+	//-----------------------------
+	// city_id
+	//-----------------------------
+
+	 $select2CityId=$('.select2-city_id').select2({
+		ajax: {
+			url: '/api/cities_list/',
+			type: "GET",
+			dataType: 'json',
+			data: function (params) {
+				curparam_user_city = "";
+				curparam_user_city = params.term;
+				var queryParameters = {
+					q: params.term
+				}
+				return queryParameters;
+			},
+ 			processResults: function (data, page) {
+				var tmp_results = [];
+ 				if (curparam_user_city != null) {
+					Cint = getRandomInt(100000);
+					tmp_results.push({ "id": "d" + Cint, "text": curparam_user_city })
+				}
+				for (i = 0; i < data.data.length; i++) {
+					tmp_results.push({ "id": "" + data.data[i].id, "text": data.data[i].text });
+				}
 				return {
 					results: tmp_results
 					//data.data 
@@ -719,13 +838,19 @@ $(function () {
 	//   $select2CityId = $("select.city_id").select2();
 
 	//
-	$('.select2-user_id').on('select2:select', function (e) {
-		currrent_user_id = e.params.data["id"];
-		clear_order_address_datas(true);
-		//alert(currrent_user_id);
-		//var data = e.params.data;
-		//console.log(data);
+	$('.select2-city_id').on('select2:select', function (e) {
+
+		current_city_id = e.params.data["id"];
+ 		var ready_id=getReadyId(current_city_id);
+ 		$("input.city_id").val(ready_id);
+ 		$("input.city_id_value").val(e.params.data["text"]);
+
+		clear_order_address_datas(false,false);
 	});
+
+	
+	
+	
 	//-------------------------------
 	//address-id
 	//-------------------------------
@@ -735,12 +860,12 @@ $(function () {
 			type: "GET",
 			dataType: 'json',
 			data: function (params) {
-				//alert(currrent_user_id);
+
 				//curparam_user_phpne="";
 				//curparam_user_phpne=params.term;
 				var queryParameters = {
 					q: params.term,
-					u: currrent_user_id
+					u: current_user_id
 				}
 
 				return queryParameters;
@@ -753,14 +878,12 @@ $(function () {
 				//   Cint=getRandomInt(100000)  ;
 
 
-				tmp_results_adr.push({ "id": "30", "text": "New address" })
+				tmp_results_adr.push({ "id": "-1", "text": "New address" })
 				//		}
 				for (i = 0; i < data.data.length; i++) {
 					tmp_results_adr.push({ "id": "" + data.data[i].id, "text": data.data[i].text });
 				}
-
-				// console.log(tmp_results);
-				return {
+ 				return {
 					results: tmp_results_adr
 					//data.data 
 				};
@@ -775,13 +898,27 @@ $(function () {
 //	$select2AddressId = $("select.select2-address_id").select2();
 
 	$('.select2-address_id').on('select2:select', function (e) {
+		current_address_id = e.params.data["id"];
+
+ 		var ready_id=getReadyId(current_address_id);
+ 		$("input.address_id").val(ready_id);
+ 		//if(current_address_id=="-1") {
+	 		setVisibleAddressDatasOrder(current_address_id)
+	 		
+ 		//}
+ 		//else{
+	 //			 		setVisibleAddressDatasOrder(false)
+
+ 		//}
+
+
 		clear_order_address_datas(false,true);
 		//var data = e.params.data;
 		//console.log(data);
 		// Do something
 	});
 
-	$select2CityId = $("select.city_id").select2();
+	//$select2CityId = $("select.city_id").select2();
 
 
 

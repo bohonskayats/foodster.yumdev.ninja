@@ -15,13 +15,13 @@ class CreateAddressesTable extends Migration
     {
         Schema::create('addresses', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->string('title')->nullable()->default(NULL);
             $table->integer('user_id')->nullable();
             $table->integer('city_id')->nullable();
-            $table->string('street');
-            $table->string('apartment');
-            $table->string('intercom');
-            $table->string('floor');
+            $table->string('street')->nullable()->default(NULL);
+            $table->string('apartment')->nullable()->default(NULL);
+            $table->string('intercom')->nullable()->default(NULL);
+            $table->string('floor')->nullable()->default(NULL);
 
 
             $table->timestamps();

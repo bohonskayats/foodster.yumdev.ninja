@@ -30,6 +30,8 @@ Route::post('/update', 'App\Http\Controllers\UserController@update');
 Route::get('/logout', 'App\Http\Controllers\UserController@logout');
 
 Route::get('/user_list/', [App\Http\Controllers\UserController::class,'user_list']);
+Route::get('/cities_list/', [App\Http\Controllers\CityController::class,'cities_list']);
+
 Route::get('/user_address_list/', [App\Http\Controllers\AddressController::class,'user_address_list']);
 Route::get('/user_address_list/{user_id}', [App\Http\Controllers\AddressController::class,'user_address_list']);
 Route::get('/user_address_list_by/', [App\Http\Controllers\AddressController::class,'user_address_list_by']);

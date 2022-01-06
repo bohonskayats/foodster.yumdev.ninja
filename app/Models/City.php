@@ -16,7 +16,9 @@ class City extends Model
    use ModelTree, AdminBuilder;
 
     public $timestamps = false;
-    
+       protected $fillable = [
+        'title',
+    ];
     public function getList(){
         return $this->get();
     }
