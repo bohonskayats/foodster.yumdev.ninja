@@ -46,7 +46,16 @@ class UserController extends Controller
 				->where('user_id', $user_id)
 				->where('code', $code)
 			    ->count();
+			    
+		    
+			    
 		if($CodesCount>0){
+			//need to delete other codes !!!!!!!!!!!!!	
+			$res=UserLoginCode::where('user_id',$user_id)
+			->delete();
+
+			
+			
 			return true;
 		}
 		return  false;		
@@ -56,34 +65,19 @@ class UserController extends Controller
 	
 	
 	//---------------------------------
-	public function getResponceForNewCode($user_id){
+	public function getNewCode($user_id,$user){
 		$created_at_max=date('Y-m-d H:i:s',strtotime('-'.$this->time_ago.' hour'));
-		//strtotime('-$time_ago seconds')
-		//var_dump($created_at_max);exit;
 		$res=UserLoginCode::where('created_at',"<",$created_at_max)
 			->where('user_id',$user_id)
 			->delete();
-			
-			
-			// Query builder
 		$CodesCount = DB::table('user_login_codes')->where('user_id', $user_id)
 			        ->count();
-			
-			// Eloquent
-			//$wordCount = Wordlist::where('id', '<=', $correctedComparisons)->count();			
-			
-			
-			//	DishOrder:: where('order_id', $order_id) -> delete ();
-			//var_dump($CodesCount);
 		if($CodesCount>=$this->count_per_time){
-				// try late
-			return -1;/*response()->json([
-	                'success' => false,
-	                'code'=>-1,
-	                'message' => 'Try later too many login attempts',
-	           ], 405);*/
+			// try late
+			return -1;
 
 		}
+		$new_code=$this->generateRandomString();
 		$code_result = UserLoginCode::create([
 			'code' => $new_code,
 			'user_id'=>$user_id
@@ -91,20 +85,39 @@ class UserController extends Controller
 			
 		if($code_result!=null){
 				$new_code=$code_result->code;
+				$this->sendGCM(true,$user->fcm_token,$user->system);
+				//var_dump( $this->sendGCM(true,$user->fcm_token));
+				
 			}
 			else{
 				$new_code=-1;
 			}
 		
 		
-		return $new_code;/*response()->json([
-                'success' => true,
-                'code'=>$new_code,
-                'message' => 'Is already exist',
-        ], 405);*/
+		return $new_code;
 		
 		
 	}
+	public function getResponceForNewCode($new_code){
+		
+			if($new_code==-1){
+				return response()->json([
+	                'success' => false,
+	                'code'=>$new_code,
+	                'message' => 'Try later too many login attempts',
+	            ], 405);
+
+			}
+			return response()->json([
+                'success' => true,
+                'code'=>$new_code,
+                'message' => 'Need new code/ already exist',
+            ], 405);
+
+		
+	}
+
+	
 	
 	//--------------------------------
 	
@@ -127,13 +140,9 @@ class UserController extends Controller
 
 	
     public function register(Request $request){
-	   // var_dump($this->guard()->factory()->getTTL() * 60);
-	   // exit;
 	    $fcm_token=$request->fcm_token;
-        //$plainPassword=$request->password;
-        //$password=bcrypt($request->password);
-        //$request->request->add(['password' => $password]);
-         $current_user_data = DB::table('users')
+
+        $current_user_data = DB::table('users')
 			->where('email', $request->email)
             ->select('users.*')
             ->first();
@@ -141,84 +150,16 @@ class UserController extends Controller
         $new_code=$this->generateRandomString(4); 
            
 		if($current_user_data!=null){
-			$new_code=getResponceForNewCode($current_user_data->id);
-			//how many code from 
-			// date('Y-m-d', strtotime('+1 week')) ."\n";
-			//date('Y-m-d H:i:s','1299762201428')
-			//$created_at_max=date('Y-m-d H:i:s',strtotime('+0 hour'));
-			//var_dump($created_at_max);
-			/*$created_at_max=date('Y-m-d H:i:s',strtotime('-'.$this->time_ago.' hour'));//strtotime('-$time_ago seconds')
-			//var_dump($created_at_max);exit;
-			$res=UserLoginCode::where('created_at',"<",$created_at_max)
-			->where('user_id',$current_user_data->id)
-			->delete();
+			$new_code=getNewCode($current_user_data->id,$current_user_data);
 			
-			
-			// Query builder
-			$CodesCount = DB::table('user_login_codes')->where('user_id', $current_user_data->id)
-			            ->count();
-			
-			// Eloquent
-			//$wordCount = Wordlist::where('id', '<=', $correctedComparisons)->count();			
-			
-			
-			//	DishOrder:: where('order_id', $order_id) -> delete ();
-			//var_dump($CodesCount);
-			if($CodesCount>=$this->count_per_time){
-				// try late
-				return response()->json([
-	                'success' => false,
-	                'code'=>-1,
-	                'message' => 'Try later too many login attempts',
-	            ], 405);
-
-			}
-			$code_result = UserLoginCode::create([
-				    'code' => $new_code,
-				    'user_id'=>$current_user_data->id
-	 			]);
-			
-			if($code_result!=null){
-				$new_code=$code_result->code;
-			}
-			else{
-				$new_code=-1;
-			}
-			return response()->json([
-                'success' => true,
-                'code'=>$new_code,
-                'message' => 'Is already exist',
-            ], 405);
-		*/	
-			if($new_code==-1){
-				return response()->json([
-	                'success' => false,
-	                'code'=>$new_code,
-	                'message' => 'Try later too many login attempts',
-	            ], 405);
-
-			}
-			return response()->json([
-                'success' => true,
-                'code'=>$new_code,
-                'message' => 'Is already exist',
-            ], 405);
+			return $this->getResponceForNewCode($new_code);
 
 		
-		}					   //remember_token
-		/*$new_token=Str::random(60);
-		
-		$request->request->add(['remember_token' => $new_token]);*/
-        // create the user account 
-        
-        
-        //var_dump($request->all());
-        //$created=User::create($request->all());
+		}
         
 		$user = new User($request->all());
-		//$user->remember_token = $new_token;
 		$user->save();   
-		$new_code=getResponceForNewCode($user->id);
+		$new_code=getNewCode($user->id,$user);
 
 		return response()->json([
                 'success' => false,
@@ -226,26 +167,44 @@ class UserController extends Controller
                 'message' => 'see the code',
             ], 200);
 
-		     
-        //$request->request->add(['password' => $plainPassword]);
-        // login now..
-        //return $this->login($request);
     }
     public function login(Request $request)
     {
         
-        $input = $request->only('email','remember_token','code');
+        $input = $request->only('email','remember_token','code','fcm_token','system');
+       
         $input_remember_token="";
+        $input_fcm_token="";
+
         $input_code="";
+        $input_system="";
+        
 		if (isset($input['remember_token'])) {
 		  $input_remember_token=$input['remember_token'];
 		}
+		
+		if (isset($input['fcm_token'])) {
+		  $input_fcm_token=$input['fcm_token'];
+		}
+
+		
 		if (isset($input['code'])) {
 		  $input_code=$input['code'];
 		}
-		//var_dump($input_remember_token);
-		//var_dump($input_code);
-        //var_dump($input);exit;
+
+		if (isset($input['system'])) {
+		  $input_system=$input['system'];
+		}
+
+
+	    //$system=$request->system;
+	    $system_ready=0;
+	    if(strtolower($input_system)=="android"){
+		    $system_ready=1;
+	    }
+	     if(strtolower($input_system)=="apple"){
+		    $system_ready=2;
+	    }
 
         $current_user_data = DB::table('users')
 			->where('email', $request->email)
@@ -264,6 +223,14 @@ class UserController extends Controller
 	      	$r_token=$current_user_data->remember_token;    
 			if($r_token==$input_remember_token && $r_token!=null 
 			&& trim($r_token)!=""){
+				$request->request->add(['remember_token',"" ]);
+				$request->request->add(['fcm_token',$input_fcm_token ]);
+				$request->request->add(['system',$system_ready ]);
+				$request->merge(['system' =>$system_ready]);
+
+				//$update_fcm = $request->only('email');
+				$this->update($request);
+				
 				 return response()->json([
 		            'success' => true,
 		            'message' => "Login success",
@@ -273,96 +240,39 @@ class UserController extends Controller
 				
 			}
 			//need new code
-			$new_code=getResponceForNewCode($current_user_data->id);
-			if($new_code==-1){
-				return response()->json([
-                'success' => false,
-                'message' => 'Too many',
-            ], 401);
-
-			}
-			
-	        return response()->json([
-                'success' => false,
-                'code'=>$new_code,
-                'message' => 'Invalid or Old token, you get new code',
-            ], 405);
+			$new_code=$this->getNewCode($current_user_data->id,$current_user_data);
+			return $this->getResponceForNewCode($new_code);
 
 
 	        
         }
         else if ($input_code!=""){
+
 	      	if($this->getCheckCode($current_user_data->id,$input_code)){
 		      	//need get/render token
 		      	$new_token=Str::random(60);
+
 		      	$request->request->add(['remember_token' => $new_token]);
+		      	$request->request->add(['system',$system_ready ]);
+		      	$request->merge(['system' => "".$system_ready]);
+		      	//$request->request->system=$system_ready;
+		      	$request->request->add(['fcm_token',$input_fcm_token ]);
+
+//!!!!!!!!!!!1
+
 
 		      	return $this->update($request);
 	      	}
-	      	
-	      	$new_code=getResponceForNewCode($current_user_data->id);
 
-			if($new_code==-1){
-				return response()->json([
-	                'success' => false,
-	                'message' => 'Too many',
-	            ], 401);
-
-			}
-			
-	        return response()->json([
-                'success' => false,
-                'code'=>$new_code,
-                'message' => 'Invalid or Old token, you get new code',
-            ], 405);
-
+	      	$new_code=$this->getNewCode($current_user_data->id,$current_user_data);
+			return $this->getResponceForNewCode($new_code);
 
 	        
         }
+	      	$new_code=$this->getNewCode($current_user_data->id,$current_user_data);
+			return $this->getResponceForNewCode($new_code);
 
-		//need new code
-		//...
 
-        var_dump($input);exit;
-        
-        $current_user_data = DB::table('users')
-			->where('email', $request->email)
-            ->select('users.*')
-            ->first();
-            
-            //var_dump($current_user_data);
-        $r_token=$current_user_data->remember_token;    
-		if($current_user_data->remember_token==$request->remember_token && $r_token!=null 
-		&& trim($r_token)!=""){
-			
-		}
-		else{
-			return response()->json([
-                'success' => false,
-                'message' => 'Invalid Email or Old token',
-            ], 401);
-		}
-       /* $credentials = $request->only('email');x
-
-       if ($token = $this->guard()->attempt($credentials)) {
-            return $this->respondWithToken($token);
-        }
-
-        JWTAuth::attempt($input);
-		*/
-        /*return response()->json([
-                'success' => false,
-                'message' => 'Invalid Email or Password',
-            ], 401);
-*/
-        // get the user 
-        $user = Auth::user();
-       
-        return response()->json([
-            'success' => true,
-            'token' => $r_token,
-            'user' => $user
-        ]);
     }
     public function logout(Request $request)
     {
@@ -438,6 +348,7 @@ class UserController extends Controller
 
    
 public function update(Request $request){
+
     $user=$this->getCurrentUser($request);
     if(!$user){
         return response()->json([
@@ -445,21 +356,30 @@ public function update(Request $request){
             'message' => 'User is not found'
         ]);
     }
-  // var_dump($request)//;exit;
+
   // $input = $request->only('remember_token');
 
   //  unset($input["remember_token"]);
-  // var_dump($user);exit;
 
-//var_dump($user);exit;
-$input = $request->only('remember_token','fcm_token');
+
+
+	$input = $request->only('remember_token','fcm_token','system');
+	//var_dump($input);exit;
     $updatedUser = User::where('id', $user->id)  ->update($input);
     //->update("reme");
     //$user =  User::find($user->id);
- $user = DB::table('users')
+	$user = DB::table('users')
 			->where('email', $request->email)
-            ->select('users.email','users.remember_token as token','users.id')
+            ->select('users.email','users.remember_token as token','users.id','users.system')
             ->first();
+    if($user->system==1){
+	    $user->system="Android";
+    }   
+   else if($user->system==2){
+	    	    $user->system="Apple";
+
+    }     
+    else{  $user->system="Unknown";}
     return response()->json([
         'success' => true, 
         'message' => 'Information has been updated successfully!',
@@ -475,6 +395,109 @@ $input = $request->only('remember_token','fcm_token');
 	
 	    return User::where('email', 'like', "%$q%")->paginate(null, ['id', 'email as text']);
 	}
+
+//---------------------------------------------
+
+	function sendGCM( $is_need_body,$fcm_id) {
+  // FCM API Url
+  $url = 'https://fcm.googleapis.com/fcm/send';
+
+  // Put your Server Response Key here
+  $apiKey = config('firebase_api_key_android');
+  //var_dump($apiKey);
+  //"AAAAqqvhjQ4:APA91bFcqd23vlIna8hpR8ojE_ZOhG0E7RPszvzboUgenO-ga0UQbUaANF_eipWMIpvSk071iFXgH2vw9LLa6CTK4BByy8jgOvUIqvcUPwT3OuSlPHu8_IybA4xnwtRJgoDWelZVQvV2";
+
+  // Compile headers in one variable
+  $headers = array (
+    'Authorization:key=' . $apiKey,
+    'Content-Type:application/json'
+  );
+
+
+  $msg = array
+(
+	'key1' 	=> 'here is a message. message!++++++!!!???',
+	'key2'		=> 'This is a title. title',
+	'needreload'=>true
+	
+);
+  
+  
+  $notifData = [
+    'title' => "Test Title1",
+ 
+    'body' => "Test notification body",
+  //  'sound' => 'es_chime_musical_4.mp3',
+ //   'android_channel_id'=> 'fcm_default_channel'
+
+    
+    // 'click_action' => "android.intent.action.MAIN"
+  ];
+
+  // Create the api body
+  //token from mobile app
+  $id=$fcm_id;
+  //"c3Smzj7QQ1qe7pz0s3Js1n:APA91bFgyUf9_KxvNxAeRxTw8P67X6OwZKsafTAv3upd78PGthxeujeh-rVcfgzoPf6oPJ_aOvN3Ss6KKoMnmQvdVX5bZR93NM66agu5MBI6SgQSo8tuqFDhlSvOIb20Nj3vL2VsjiUS";
+  //"e4QKDFrFQgG4MZWsYkQW2b:APA91bE3QNxglVkLkHXM2qT8rQyUuckN0CQPna1WZtFnlIaqguGcwvCt8SjsW6rXXIbJDYmu-Ph8kvYMoUcP3q5pqE7cejGDfQ6KZ46Tf1K7Ggno4m4y1Xx-a3iuwmnBFuMWwJSPupta";
+  //"ejeDifUhS16uQ9BFlidyPj:APA91bGk0FmOF-Qpr3nRswGZGwug5y1ojGTSNe48dyihhs_jbQCsNbLUqXh6-jHXKXkffY8RbssN-JolQ8ENudpvWGTOsRkhJycPOP1w3e4ETtnrSQxzsoFn6fpvpgtI5hFOweh51l0v";
+ if($is_need_body){
+	  $apiBody = [
+    'notification' => $notifData,
+   //  'priority'=>'high',
+
+	'android'=> array (
+		 'android_channel_id'=> 'fcm_default_channel',
+
+		'notification' => array (
+	//		    'sound' => 'es_chime_musical_4',
+    'android_channel_id'=> 'fcm_default_channel'
+
+		),
+	//      'priority'=>'high'
+	   ),
+    // 'content_available'=> true,
+  //  'priority'=>'high',
+   // 'data' => $msg,
+    'registration_ids' => array (
+                    $id
+            ),
+
+    "time_to_live" => 600, // Optional
+   // 'to' => '/weather' // Replace 'mytargettopic' with your intended notification audience
+  ];
+ }
+ else{
+	  $apiBody = [
+   // 'notification' => $notifData,
+
+    
+    'data' => $msg,
+    'registration_ids' => array (
+                    $id
+            ),
+
+    "time_to_live" => 600, // Optional
+   // 'to' => '/weather' // Replace 'mytargettopic' with your intended notification audience
+  ];
+ }
+ 
+
+  // Initialize curl with the prepared headers and body
+  $ch = curl_init();
+  curl_setopt ($ch, CURLOPT_URL, $url );
+  curl_setopt ($ch, CURLOPT_POST, true );
+  curl_setopt ($ch, CURLOPT_HTTPHEADER, $headers);
+  curl_setopt ($ch, CURLOPT_RETURNTRANSFER, true );
+  curl_setopt ($ch, CURLOPT_POSTFIELDS, json_encode($apiBody));
+
+  // Execute call and save result
+  $result = curl_exec ( $ch );
+  //print_r ($result);
+  // Close curl after call
+  curl_close ( $ch );
+
+  return $result;
+}
 
 
 
