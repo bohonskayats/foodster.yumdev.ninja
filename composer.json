@@ -9,13 +9,13 @@
         "encore/laravel-admin": "^1.8",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
+        "intervention/image": "dev-master",
         "jxlwqq/wang-editor2": "^1.0",
+        "laravel-admin-ext/config": "^1.1",
         "laravel/framework": "^8.54",
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
-        "tymon/jwt-auth": "^1.0",
-        "intervention/image": "dev-master"
-
+        "tymon/jwt-auth": "^1.0"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

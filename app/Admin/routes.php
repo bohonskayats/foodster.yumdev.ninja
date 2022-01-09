@@ -24,6 +24,7 @@ Route::group([
 	$router->resource('payment-methods', PaymentMethodController::class);
 	$router->resource('orders', OrderController::class);
 	$router->resource('api', ApiController::class);
+	$router->resource('user-login-codes', UserLoginCodeController::class);
 	//Route::get('/tmp', 						[App\Admin\Controllers\ApiController::class,'user_address_list_by']);
 	Route::get('/api_user_address_list_by', [App\Admin\Controllers\ApiController::class,'user_address_list_by']);
 	Route::get('/api_user_list', [App\Admin\Controllers\ApiController::class,'user_list_by']);

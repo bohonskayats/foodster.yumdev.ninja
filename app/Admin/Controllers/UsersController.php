@@ -31,7 +31,9 @@ class UsersController extends AdminController
         $grid->column('email', __('Phone'));
         $grid->column('email_verified_at', __('Email verified at'));
        // $grid->column('password', __('Password'));
-        $grid->column('remember_token', __('Remember token'));
+        //$grid->column('remember_token', __('Remember token'));
+       // $grid->column('fcm_token', __('FCM token'));
+
         $grid->column('created_at', __('Created at'));
         $grid->column('updated_at', __('Updated at'));
 
@@ -54,6 +56,8 @@ class UsersController extends AdminController
         $show->field('email_verified_at', __('Email verified at'));
        // $show->field('password', __('Password'));
         $show->field('remember_token', __('Remember token'));
+        $show->field('fcm_token', __('FCM token'));
+
         $show->field('created_at', __('Created at'));
         $show->field('updated_at', __('Updated at'));
 
@@ -75,6 +79,7 @@ class UsersController extends AdminController
         $form->datetime('email_verified_at', __('Email verified at'))->default(date('Y-m-d H:i:s'));
       //  $form->password('password', __('Password'));
         $form->text('remember_token', __('Remember token'));
+        $form->text('fcm_token', __('FCM token'));
 
         return $form;
     }
