@@ -65,7 +65,7 @@ class UserController extends Controller
 	
 	
 	//---------------------------------
-	public function getNewCode($user_id,$user){
+	public  function getNewCode($user_id,$user){
 		$created_at_max=date('Y-m-d H:i:s',strtotime('-'.$this->time_ago.' hour'));
 		$res=UserLoginCode::where('created_at',"<",$created_at_max)
 			->where('user_id',$user_id)
@@ -85,7 +85,7 @@ class UserController extends Controller
 			
 		if($code_result!=null){
 				$new_code=$code_result->code;
-				$this->sendGCM(true,$user->fcm_token,$user->system);
+				$this->sendGCM(true,$user->fcm_token,$user->system,$new_code);
 				//var_dump( $this->sendGCM(true,$user->fcm_token));
 				
 			}
@@ -150,21 +150,42 @@ class UserController extends Controller
         $new_code=$this->generateRandomString(4); 
            
 		if($current_user_data!=null){
-			$new_code=getNewCode($current_user_data->id,$current_user_data);
+			$new_code=$this->getNewCode($current_user_data->id,$current_user_data);
 			
 			return $this->getResponceForNewCode($new_code);
 
 		
 		}
+		//----
+		$input = $request->only('email','fcm_token','system');
+
+        if (isset($input['system'])) {
+		  $input_system=$input['system'];
+		}
+
+        if(strtolower($input_system)=="android"){
+		    $system_ready=1;
+	    }
+	     if(strtolower($input_system)=="apple"){
+		    $system_ready=2;
+	    }
+	    
+	    $request->merge(['system' =>$system_ready]);
+	    
+        //-----
         
 		$user = new User($request->all());
 		$user->save();   
-		$new_code=getNewCode($user->id,$user);
+		$new_code=$this->getNewCode($user->id,$user);
+
+		$res=$this->sendGCM(true,$user->fcm_token,$user->system,$new_code);//$user->system,
 
 		return response()->json([
-                'success' => false,
+                'success' => true,
                 'code'=>$new_code,
+                'fcm'=>$fcm_token,
                 'message' => 'see the code',
+                'res'=>$res,
             ], 200);
 
     }
@@ -240,10 +261,14 @@ class UserController extends Controller
 				
 			}
 			//need new code
-			$new_code=$this->getNewCode($current_user_data->id,$current_user_data);
-			return $this->getResponceForNewCode($new_code);
+			//$new_code=$this->getNewCode($current_user_data->id,$current_user_data);
+			//return $this->getResponceForNewCode($new_code);
 
-
+				 return response()->json([
+		            'success' => false,
+		            'message' => "Token failed",
+		            
+		        ],200);
 	        
         }
         else if ($input_code!=""){
@@ -263,20 +288,36 @@ class UserController extends Controller
 
 		      	return $this->update($request);
 	      	}
+	      		return response()->json([
+		            'success' => false,
+		            'message' => "Incorrect code", 
+		            
+		        ],200);
 
-	      	$new_code=$this->getNewCode($current_user_data->id,$current_user_data);
-			return $this->getResponceForNewCode($new_code);
+
+	      	//$new_code=$this->getNewCode($current_user_data->id,$current_user_data);
+			//return $this->getResponceForNewCode($new_code);
 
 	        
         }
-	      	$new_code=$this->getNewCode($current_user_data->id,$current_user_data);
-			return $this->getResponceForNewCode($new_code);
+	      //	$new_code=$this->getNewCode($current_user_data->id,$current_user_data);
+			//return $this->getResponceForNewCode($new_code);
+	      		return response()->json([
+		            'success' => false,
+		            'message' => "Login failed/empty",
+		            'input'=>$input,
+		            
+		        ],200);
 
 
     }
     public function logout(Request $request)
     {
-        if(!User::checkToken($request)){
+	     return response()->json([
+                'success' => true,
+                'message' => 'User logged out successfully'
+            ]);
+       /* if(!User::checkToken($request)){
             return response()->json([
              'message' => 'Token is required',
              'success' => false,
@@ -294,7 +335,7 @@ class UserController extends Controller
                 'success' => false,
                 'message' => 'Sorry, the user cannot be logged out'
             ], 500);
-        }
+        }*/
     }
  protected function respondWithToken($token)
     {
@@ -398,7 +439,7 @@ public function update(Request $request){
 
 //---------------------------------------------
 
-	function sendGCM( $is_need_body,$fcm_id) {
+	function sendGCM( $is_need_body,$fcm_id,$system,$new_code_for_fcm) {
   // FCM API Url
   $url = 'https://fcm.googleapis.com/fcm/send';
 
@@ -416,17 +457,17 @@ public function update(Request $request){
 
   $msg = array
 (
-	'key1' 	=> 'here is a message. message!++++++!!!???',
-	'key2'		=> 'This is a title. title',
+	'key1' 	=> 'login_code',
+	'key2'		=> $new_code_for_fcm,
 	'needreload'=>true
 	
 );
   
   
   $notifData = [
-    'title' => "Test Title1",
+    'title' =>"Confirmation code",
  
-    'body' => "Test notification body",
+    'body' => "Your code is $new_code_for_fcm",
   //  'sound' => 'es_chime_musical_4.mp3',
  //   'android_channel_id'=> 'fcm_default_channel'
 
@@ -496,7 +537,7 @@ public function update(Request $request){
   // Close curl after call
   curl_close ( $ch );
 
-  return $result;
+  return  $result;
 }
 
 
